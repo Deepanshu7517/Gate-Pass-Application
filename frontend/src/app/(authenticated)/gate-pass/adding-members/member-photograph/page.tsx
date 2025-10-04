@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { useCheckin } from "../../../../hooks/useCheckIn";
-import { Button } from "../../../../components/ui/button";
+import { useCheckin } from "../../../../../hooks/useCheckIn";
+import { Button } from "../../../../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,29 +8,47 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../../../components/ui/card";
+} from "../../../../../components/ui/card";
 import { Camera, Check } from "lucide-preact";
-import { useToast } from "../../../../hooks/use-toast";
+import { useToast } from "../../../../../hooks/use-toast";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "../../../../components/ui/alert";
-import { useNavigate } from "react-router-dom";
-import CameraPermissionButton from "../../../../components/ui/cameraPermission";
+} from "../../../../../components/ui/alert";
+import { useNavigate, useParams } from "react-router-dom";
+import CameraPermissionButton from "../../../../../components/ui/cameraPermission";
 
-export default function GatePassPhotographPage() {
+export default function GatePassMemberPhotographPage() {
+  const { index } = useParams<{ index: string }>();
+  const memberIndex = Number(index);
+
   const navigate = useNavigate();
-  const { checkinState, updatePhotograph } = useCheckin();
   const { toast } = useToast();
+  const { checkinState, updateMember } = useCheckin();
+
+  const { currentMemberIndex, members } = checkinState;
+  const member = currentMemberIndex !== null && members ? members[currentMemberIndex] : null;
 
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-  // Track photo state locally for UI (parent/primary visitor photograph)
-  const [photoTaken, setPhotoTaken] = useState(!!checkinState.photograph);
+  const [capturedImage, setCapturedImage] = useState<string | null>(member?.photograph || null);
+  const [photoTaken, setPhotoTaken] = useState(!!member?.photograph);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Get camera permission and start video stream
+  // Check if member exists and redirect if not
+  useEffect(() => {
+    if (!member && members) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No member selected. Redirecting...",
+      });
+      navigate("/gate-pass/add-members");
+    }
+  }, [member, members, navigate, toast]);
+
   const getCameraPermission = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -53,7 +71,7 @@ export default function GatePassPhotographPage() {
 
   useEffect(() => {
     // Only request camera if no photo has been taken yet
-    if (!checkinState.photograph) {
+    if (!photoTaken) {
       getCameraPermission();
     }
 
@@ -64,9 +82,11 @@ export default function GatePassPhotographPage() {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [photoTaken]);
 
   const handleCapture = () => {
+    if (currentMemberIndex === null) return;
+
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -75,65 +95,83 @@ export default function GatePassPhotographPage() {
       const context = canvas.getContext("2d");
       context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-      // Convert canvas to base64 image
       const dataUri = canvas.toDataURL("image/jpeg");
-      
-      // Update Redux store with the photograph
-      updatePhotograph(dataUri);
+
+      // Update local state
+      setCapturedImage(dataUri);
       setPhotoTaken(true);
 
-      // Stop the video stream after capturing
+      // Update Redux store
+      updateMember(currentMemberIndex, { photograph: dataUri });
+
+      // Stop video stream after capturing
       if (video.srcObject) {
         const stream = video.srcObject as MediaStream;
         stream.getTracks().forEach((track) => track.stop());
       }
 
       toast({
-        title: "Photo Captured",
-        description: "Visitor photograph captured successfully!",
+        title: "Photograph Captured!",
+        description: `Photo for ${member?.basicDetails.firstName || "member"} has been saved.`,
       });
     }
   };
 
   const handleRetake = () => {
-    // Clear the photo from Redux store
-    updatePhotograph(null);
+    if (currentMemberIndex === null) return;
+
+    // Clear photo from Redux store
+    updateMember(currentMemberIndex, { photograph: null });
+    setCapturedImage(null);
     setPhotoTaken(false);
-    
+
     // Restart camera
     getCameraPermission();
   };
 
   const handleNext = () => {
-    if (!checkinState.photograph) {
+    if (!capturedImage) {
       toast({
         variant: "destructive",
-        title: "Photo Required",
+        title: "No Photo Captured",
         description: "Please capture a photograph before proceeding.",
       });
       return;
     }
-    
-    console.log("Current check-in state:", checkinState);
-    navigate("/gate-pass/identity-proof");
+
+    console.log("Current state:", checkinState);
+    navigate(`/gate-pass/add-members/${memberIndex}/identity-proof`);
   };
+
+  // Show loading state while checking member
+  if (!member && members) {
+    return (
+      <Card className="w-full max-w-2xl shadow-lg">
+        <CardContent className="p-6 text-center">
+          <p className="text-lg">Loading member data...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const memberNumber = memberIndex + 1;
 
   return (
     <Card className="w-full max-w-2xl shadow-lg">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">
-          Visitor Photograph
+          Member #{memberNumber} - Photograph
         </CardTitle>
         <CardDescription>
-          Please capture a clear photograph of the visitor.
+          Please capture a clear photo of the team member.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center space-y-4">
         <div className="relative h-64 w-64 overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de]">
-          {checkinState.photograph ? (
+          {capturedImage ? (
             <img
-              src={checkinState.photograph}
-              alt="Visitor photograph"
+              src={capturedImage}
+              alt="Member photograph"
               className="h-full w-full object-cover"
             />
           ) : (
@@ -147,7 +185,7 @@ export default function GatePassPhotographPage() {
           )}
           <canvas ref={canvasRef} className="hidden" />
         </div>
-        
+
         {hasCameraPermission === false && (
           <div className="flex flex-col items-center gap-2">
             <Alert variant="destructive">
@@ -175,22 +213,25 @@ export default function GatePassPhotographPage() {
               <Check className="mr-2 h-5 w-5" />
               <p>Photo captured successfully!</p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRetake}
-            >
+            <Button variant="outline" size="sm" onClick={handleRetake}>
               Retake Photo
             </Button>
           </div>
         )}
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={() => navigate(-1)}>
+        <Button
+          variant="outline"
+          onClick={() => navigate(`/gate-pass/add-members/${memberIndex}/basic-details`)}
+        >
           Back
         </Button>
-        <Button variant={"default"} onClick={handleNext} disabled={!photoTaken}>
-          Next
+        <Button
+          variant={"default"}
+          onClick={handleNext}
+          disabled={!capturedImage}
+        >
+          Next Step
         </Button>
       </CardFooter>
     </Card>

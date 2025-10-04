@@ -1,18 +1,18 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { type CheckinState } from "../../types/checkIn";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { CheckinState, Member } from '../../types';
 
 const initialState: CheckinState = {
   basicDetails: {
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
   },
   companyDetails: {
-    companyName: "",
-    address: "",
-    hostName: "",
-    purposeOfVisit: "",
+    companyName: '',
+    address: '',
+    hostName: '',
+    purposeOfVisit: '',
   },
   photograph: null,
   identityProof: null,
@@ -20,53 +20,106 @@ const initialState: CheckinState = {
     electrical: [],
     mechanical: [],
   },
+  members: [],
+  currentMemberIndex: null,
   nda: {
-    signature: "",
-    date: "",
-    name: "",
-    company: "",
-    address: "", // Add this line
+    signature: null,
+    date: '',
+    name: '',
+    company: '',
+    address: '',
     accepted: false,
   },
   id: null,
 };
 
 const checkinSlice = createSlice({
-  name: "checkin",
+  name: 'checkin',
   initialState,
   reducers: {
+    // Update entire state or partial state
     updateState: (state, action: PayloadAction<Partial<CheckinState>>) => {
       return { ...state, ...action.payload };
     },
-    updateBasicDetails: (
-      state,
-      action: PayloadAction<Partial<CheckinState["basicDetails"]>>
-    ) => {
+
+    // Update basic details
+    updateBasicDetails: (state, action: PayloadAction<Partial<CheckinState['basicDetails']>>) => {
       state.basicDetails = { ...state.basicDetails, ...action.payload };
     },
-    updateCompanyDetails: (
-      state,
-      action: PayloadAction<Partial<CheckinState["companyDetails"]>>
-    ) => {
+
+    // Update company details
+    updateCompanyDetails: (state, action: PayloadAction<Partial<CheckinState['companyDetails']>>) => {
       state.companyDetails = { ...state.companyDetails, ...action.payload };
     },
-    updateEquipment: (
-      state,
-      action: PayloadAction<Partial<CheckinState["equipment"]>>
-    ) => {
-      state.equipment = { ...state.equipment, ...action.payload };
-    },
-    updateNda: (state, action: PayloadAction<Partial<CheckinState["nda"]>>) => {
-      state.nda = { ...state.nda, ...action.payload };
-    },
+
+    // Update photograph
     updatePhotograph: (state, action: PayloadAction<string | null>) => {
       state.photograph = action.payload;
     },
+
+    // Update identity proof
     updateIdentityProof: (state, action: PayloadAction<string | null>) => {
       state.identityProof = action.payload;
     },
-    resetCheckin: () => {
+
+    // Update equipment
+    updateEquipment: (state, action: PayloadAction<CheckinState['equipment']>) => {
+      state.equipment = action.payload;
+    },
+
+    // Update NDA
+    updateNda: (state, action: PayloadAction<Partial<CheckinState['nda']>>) => {
+      state.nda = { ...state.nda, ...action.payload };
+    },
+
+    // Add new member
+    addNewMember: (state) => {
+      const newMember: Member = {
+        basicDetails: { firstName: '', lastName: '', email: '', phone: '' },
+        photograph: null,
+        identityProof: null,
+        equipment: { electrical: [], mechanical: [] },
+      };
+      state.members = state.members ? [...state.members, newMember] : [newMember];
+      state.currentMemberIndex = state.members.length - 1;
+    },
+
+    // Update specific member
+    updateMember: (state, action: PayloadAction<{ index: number; member: Partial<Member> }>) => {
+      if (state.members && state.members[action.payload.index]) {
+        state.members[action.payload.index] = {
+          ...state.members[action.payload.index],
+          ...action.payload.member,
+        };
+      }
+    },
+
+    // Remove member
+    removeMember: (state, action: PayloadAction<number>) => {
+      if (state.members) {
+        state.members = state.members.filter((_, index) => index !== action.payload);
+        // Adjust currentMemberIndex if needed
+        if (state.currentMemberIndex !== null) {
+          if (state.currentMemberIndex >= state.members.length) {
+            state.currentMemberIndex = state.members.length > 0 ? state.members.length - 1 : null;
+          }
+        }
+      }
+    },
+
+    // Set current member index
+    setCurrentMemberIndex: (state, action: PayloadAction<number | null>) => {
+      state.currentMemberIndex = action.payload;
+    },
+
+    // Reset state
+    resetCheckinState: () => {
       return initialState;
+    },
+
+    // Set checkin ID
+    setCheckinId: (state, action: PayloadAction<string | null>) => {
+      state.id = action.payload;
     },
   },
 });
@@ -75,11 +128,16 @@ export const {
   updateState,
   updateBasicDetails,
   updateCompanyDetails,
-  updateEquipment,
-  updateNda,
   updatePhotograph,
   updateIdentityProof,
-  resetCheckin,
+  updateEquipment,
+  updateNda,
+  addNewMember,
+  updateMember,
+  removeMember,
+  setCurrentMemberIndex,
+  resetCheckinState,
+  setCheckinId,
 } = checkinSlice.actions;
 
 export default checkinSlice.reducer;

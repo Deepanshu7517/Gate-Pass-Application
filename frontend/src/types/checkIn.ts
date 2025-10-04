@@ -3,6 +3,21 @@ export type Equipment = {
   quantity: number;
 };
 
+export interface Member {
+  basicDetails: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  };
+  photograph: string | null;
+  identityProof: string | null;
+  equipment: {
+    electrical: Equipment[];
+    mechanical: Equipment[];
+  };
+}
+
 export type CheckinState = {
   basicDetails: {
     firstName: string;
@@ -22,13 +37,15 @@ export type CheckinState = {
     electrical: Equipment[];
     mechanical: Equipment[];
   };
+  members: Member[] | null;
+  currentMemberIndex: number | null  
   nda: {
-    signature: string;
+    signature: string|null;
     date: string;
     name: string;
     company: string;
-    address: string;  // Add this line
+    address: string;
     accepted: boolean;
   };
-  id:null | string
+  id: string | null;
 };

@@ -28,9 +28,10 @@ type FormErrors = {
 
 export default function GatePassBasicDetailsPage() {
   const navigate = useNavigate();
-  const { state, dispatch } = useCheckin();
+  const { checkinState, updateBasicDetails } = useCheckin();
 
-  const [formData, setFormData] = useState<FormData>(state.basicDetails);
+  // Initialize form data from Redux state (parent/primary visitor details)
+  const [formData, setFormData] = useState<FormData>(checkinState.basicDetails);
   const [errors, setErrors] = useState<FormErrors>({});
 
   const validateForm = (): boolean => {
@@ -77,11 +78,10 @@ export default function GatePassBasicDetailsPage() {
     e.preventDefault();
     
     if (validateForm()) {
-      dispatch({
-        type: "UPDATE_STATE",
-        payload: { basicDetails: formData },
-      });
-      console.log(state);
+      // Update Redux store with the form data
+      updateBasicDetails(formData);
+      console.log(checkinState);
+      // Navigate to next page
       navigate("/gate-pass/company-details");
     }
   };

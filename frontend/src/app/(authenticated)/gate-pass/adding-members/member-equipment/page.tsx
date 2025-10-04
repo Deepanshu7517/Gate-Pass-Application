@@ -1,6 +1,6 @@
-import { useState } from "preact/hooks";
-import { useCheckin } from "../../../../hooks/useCheckIn";
-import { Button } from "../../../../components/ui/button";
+import { useState, useEffect } from "preact/hooks";
+import { useCheckin } from "../../../../../hooks/useCheckIn";
+import { Button } from "../../../../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,10 +8,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../../../components/ui/card";
-import { Input } from "../../../../components/ui/input";
-import { Minus, Plus, PlusCircle, Trash2 } from "lucide-preact";
-import { useNavigate } from "react-router-dom";
+} from "../../../../../components/ui/card";
+import { Input } from "../../../../../components/ui/input";
+import { Minus, Plus, PlusCircle, Trash2, Check } from "lucide-preact";
+import { useNavigate, useParams } from "react-router-dom";
+import { useToast } from "../../../../../hooks/use-toast";
 
 type Equipment = {
   name: string;
@@ -23,15 +24,33 @@ type FormData = {
   mechanical: Equipment[];
 };
 
-export default function GatePassEquipmentPage() {
-  const navigate = useNavigate();
-  const { checkinState, updateEquipment } = useCheckin();
+export default function GatePassMemberEquipmentPage() {
+  const { index } = useParams<{ index: string }>();
+  const memberIndex = Number(index);
 
-  // Initialize form data from Redux state, filtering out empty entries
-  const [formData, setFormData] = useState<FormData>({
-    electrical: checkinState.equipment.electrical.filter((e) => e.name),
-    mechanical: checkinState.equipment.mechanical.filter((e) => e.name),
-  });
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { checkinState, updateMember, setCurrentMemberIndex } = useCheckin();
+
+  const { currentMemberIndex, members } = checkinState;
+  const member = currentMemberIndex !== null && members ? members[currentMemberIndex] : null;
+
+  // Initialize form with current member's equipment or empty arrays
+  const [formData, setFormData] = useState<FormData>(
+    member?.equipment || { electrical: [], mechanical: [] }
+  );
+
+  // Check if member exists and redirect if not
+  useEffect(() => {
+    if (!member && members) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No member selected. Redirecting...",
+      });
+      navigate("/gate-pass/add-members");
+    }
+  }, [member, members, navigate, toast]);
 
   const handleEquipmentChange = (
     type: "electrical" | "mechanical",
@@ -73,18 +92,43 @@ export default function GatePassEquipmentPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (currentMemberIndex === null) return;
+
     // Filter out empty equipment entries before saving
     const cleanedData = {
       electrical: formData.electrical.filter((item) => item.name.trim()),
       mechanical: formData.mechanical.filter((item) => item.name.trim()),
     };
 
-    // Update Redux store with equipment data
-    updateEquipment(cleanedData);
-    
-    console.log("Current check-in state:", checkinState);
+    // Update member in Redux store
+    updateMember(currentMemberIndex, { equipment: cleanedData });
+
+    // Reset currentMemberIndex to null after finishing with this member
+    setCurrentMemberIndex(null);
+
+    toast({
+      title: "Member Added!",
+      description: "The new member and their equipment have been added to the list.",
+    });
+
+    console.log("Current state:", checkinState);
+
+    // Navigate back to members list
     navigate("/gate-pass/add-members");
   };
+
+  // Show loading state while checking member
+  if (!member && members) {
+    return (
+      <Card className="w-full max-w-4xl shadow-lg">
+        <CardContent className="p-6 text-center">
+          <p className="text-lg">Loading member data...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const memberNumber = memberIndex + 1;
 
   const renderEquipmentSection = (
     type: "electrical" | "mechanical",
@@ -211,10 +255,10 @@ export default function GatePassEquipmentPage() {
       <form onSubmit={handleSubmit}>
         <CardHeader>
           <CardTitle className="font-headline text-2xl">
-            Equipment Details
+            Member #{memberNumber} - Equipment
           </CardTitle>
           <CardDescription>
-            List any equipment the visitor is bringing. Leave blank if none.
+            List any equipment this team member is bringing.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-8 md:grid-cols-2">
@@ -226,11 +270,15 @@ export default function GatePassEquipmentPage() {
           )}
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => navigate(-1)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(`/gate-pass/add-members/${memberIndex}/identity-proof`)}
+          >
             Back
           </Button>
           <Button variant="default" size="default" type="submit">
-            Next
+            Finish Adding Member <Check className="ml-2 h-4 w-4" />
           </Button>
         </CardFooter>
       </form>

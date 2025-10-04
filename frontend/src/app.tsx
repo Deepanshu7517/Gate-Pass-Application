@@ -23,6 +23,11 @@ import GatePassEquipmentPage from "./app/(authenticated)/gate-pass/equipment/pag
 import GatePassNdaSigningPage from "./app/(authenticated)/gate-pass/nda-signing/page";
 import GatePassPrintBadgePage from "./app/(authenticated)/gate-pass/print-badge/page";
 import LoginPage from "./app/page";
+import AddVisitorPage from "./app/(authenticated)/gate-pass/adding-members/adding-members";
+import GatePassMemberBasicDetailsPage from "./app/(authenticated)/gate-pass/adding-members/member-basic-details/page";
+import GatePassMemberPhotographPage from "./app/(authenticated)/gate-pass/adding-members/member-photograph/page";
+import GatePassMemberIdentityProofPage from "./app/(authenticated)/gate-pass/adding-members/member-identity-proof/page";
+import GatePassMemberEquipmentPage from "./app/(authenticated)/gate-pass/adding-members/member-equipment/page";
 
 const routes = createBrowserRouter([
   {
@@ -138,6 +143,46 @@ const routes = createBrowserRouter([
     element: (
       <GatePassLayout>
         <GatePassEquipmentPage />
+      </GatePassLayout>
+    ),
+  },
+  {
+    path: "/gate-pass/add-members",
+    element: (
+      <GatePassLayout>
+        <AddVisitorPage />
+      </GatePassLayout>
+    ),
+  },
+  {
+    path: "/gate-pass/add-members/:index/basic-details",
+    element: (
+      <GatePassLayout>
+        <GatePassMemberBasicDetailsPage />
+      </GatePassLayout>
+    ),
+  },
+  {
+    path: "/gate-pass/add-members/:index/photograph",
+    element: (
+      <GatePassLayout>
+        <GatePassMemberPhotographPage />
+      </GatePassLayout>
+    ),
+  },
+  {
+    path: "/gate-pass/add-members/:index/identity-proof",
+    element: (
+      <GatePassLayout>
+        <GatePassMemberIdentityProofPage />
+      </GatePassLayout>
+    ),
+  },
+  {
+    path: "/gate-pass/add-members/:index/equipment",
+    element: (
+      <GatePassLayout>
+        <GatePassMemberEquipmentPage />
       </GatePassLayout>
     ),
   },

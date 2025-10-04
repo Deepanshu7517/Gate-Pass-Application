@@ -30,10 +30,13 @@ type FormErrors = {
 
 export default function GatePassCompanyDetailsPage() {
   const navigate = useNavigate();
-  const { state, dispatch } = useCheckin();
+  const { checkinState, updateCompanyDetails } = useCheckin();
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState<FormData>(state.companyDetails);
+  // Initialize form data from Redux state (parent/primary visitor company details)
+  const [formData, setFormData] = useState<FormData>(
+    checkinState.companyDetails
+  );
   const [errors, setErrors] = useState<FormErrors>({});
 
   const validateForm = (): boolean => {
@@ -64,33 +67,34 @@ export default function GatePassCompanyDetailsPage() {
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (validateForm()) {
-      dispatch({
-        type: "UPDATE_STATE",
-        payload: { companyDetails: formData },
-      });
 
-      // In a real app, you would save this to a database.
-      // For now, we'll just show a success message and redirect.
-      console.log("Gate Pass Request:", { ...state.basicDetails, ...formData });
+    if (validateForm()) {
+      // Update Redux store with company details
+      updateCompanyDetails(formData);
+
+      // Log the complete check-in data (from Redux state + new form data)
+      console.log("Gate Pass Request:", {
+        basicDetails: checkinState.basicDetails,
+        companyDetails: formData,
+      });
 
       toast({
         title: "Gate Pass Requested",
         description: "The visitor has been added to the pending list.",
       });
-
-      navigate("/requests");
+      console.log(checkinState);
+      // Navigate to the next page
+      navigate("/gate-pass/photograph");
     }
   };
 
@@ -102,72 +106,100 @@ export default function GatePassCompanyDetailsPage() {
             Company & Visit Details
           </CardTitle>
           <CardDescription>
-            Please enter information about the visitor's company and purpose
-            of visit.
+            Please enter information about the visitor's company and purpose of
+            visit.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label htmlFor="companyName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <label
+              htmlFor="companyName"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Company Name
             </label>
             <Input
               id="companyName"
               placeholder="Acme Inc."
               value={formData.companyName}
-              onChange={(e) => handleInputChange('companyName', e.currentTarget.value)}
+              onChange={(e) =>
+                handleInputChange("companyName", e.currentTarget.value)
+              }
               className={errors.companyName ? "border-red-500" : ""}
             />
             {errors.companyName && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.companyName}</p>
+              <p className="text-sm font-medium text-red-500 mt-1">
+                {errors.companyName}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="address" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <label
+              htmlFor="address"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Company Address
             </label>
             <Input
               id="address"
               placeholder="123 Main St, Anytown, USA"
               value={formData.address}
-              onChange={(e) => handleInputChange('address', e.currentTarget.value)}
+              onChange={(e) =>
+                handleInputChange("address", e.currentTarget.value)
+              }
               className={errors.address ? "border-red-500" : ""}
             />
             {errors.address && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.address}</p>
+              <p className="text-sm font-medium text-red-500 mt-1">
+                {errors.address}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="hostName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <label
+              htmlFor="hostName"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Host Name
             </label>
             <Input
               id="hostName"
               placeholder="Jane Doe"
               value={formData.hostName}
-              onChange={(e) => handleInputChange('hostName', e.currentTarget.value)}
+              onChange={(e) =>
+                handleInputChange("hostName", e.currentTarget.value)
+              }
               className={errors.hostName ? "border-red-500" : ""}
             />
             {errors.hostName && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.hostName}</p>
+              <p className="text-sm font-medium text-red-500 mt-1">
+                {errors.hostName}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="purposeOfVisit" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <label
+              htmlFor="purposeOfVisit"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Purpose of Visit
             </label>
             <Textarea
               id="purposeOfVisit"
               placeholder="Scheduled meeting to discuss Q3 project."
               value={formData.purposeOfVisit}
-              onChange={(e) => handleInputChange('purposeOfVisit', e.currentTarget.value)}
+              onChange={(e) =>
+                handleInputChange("purposeOfVisit", e.currentTarget.value)
+              }
               className={errors.purposeOfVisit ? "border-red-500" : ""}
             />
             {errors.purposeOfVisit && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.purposeOfVisit}</p>
+              <p className="text-sm font-medium text-red-500 mt-1">
+                {errors.purposeOfVisit}
+              </p>
             )}
           </div>
         </CardContent>
