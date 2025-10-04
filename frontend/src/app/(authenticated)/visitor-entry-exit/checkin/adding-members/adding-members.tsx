@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Button } from "../../../../components/ui/button";
+import { Button } from "../../../../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,7 +7,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../../../components/ui/card";
+} from "../../../../../components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,12 +15,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../../../components/ui/table";
+} from "../../../../../components/ui/table";
 import { UserPlus, UserX, User, Users } from "lucide-preact";
 import { useNavigate } from "react-router-dom";
-import { useCheckin } from "../../../../hooks/useCheckIn";
+import { useCheckin } from "../../../../../hooks/useCheckIn";
 
-export default function GatePassAddVisitorPage() {
+export default function AddVisitorPage() {
   const navigate = useNavigate();
   const { checkinState, addNewMember } = useCheckin();
 
@@ -41,17 +41,17 @@ export default function GatePassAddVisitorPage() {
     console.log("Current state:", checkinState);
 
     // Navigate to the Basic Details page for the new member
-    navigate(`/gate-pass/add-members/${newMemberIndex}/basic-details`);
+    navigate(`/visitor-entry-exit/checkin/add-members/${newMemberIndex}/basic-details`);
   };
 
   const handleEditMember = (index: number) => {
     // Navigate to edit existing member
-    navigate(`/gate-pass/add-members/${index}/basic-details`);
+    navigate(`/visitor-entry-exit/checkin/add-members/${index}/basic-details`);
   };
 
   const handleNext = () => {
     // Proceed to NDA signing
-    navigate("/gate-pass/nda-signing");
+    navigate("/visitor-entry-exit/checkin/nda-signing");
   };
 
   const hasMembersAdded = checkinState.members && checkinState.members.length > 0;

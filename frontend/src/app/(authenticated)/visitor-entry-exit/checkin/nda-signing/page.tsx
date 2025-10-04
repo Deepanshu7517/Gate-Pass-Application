@@ -1,5 +1,7 @@
-import { useState, useEffect } from "preact/hooks";
-import { useCheckin } from "../../../../../context/checkin-context";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { type RootState } from "../../../../../store";
+import { updateState } from "../../../../../store/slices/checkinSlice";
 import { Button } from "../../../../../components/ui/button";
 import {
   Card,
@@ -12,10 +14,12 @@ import {
 import { Input } from "../../../../../components/ui/input";
 import { ScrollArea } from "../../../../../components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
+import SignatureCanvas from "../../../../../components/ui/signatureCanvas";
 
 type FormData = {
   name: string;
   company: string;
+  address: string;
   date: string;
   signature: string;
 };
@@ -23,79 +27,125 @@ type FormData = {
 type FormErrors = {
   name?: string;
   company?: string;
+  address?: string;
   date?: string;
   signature?: string;
 };
 
 export default function NdaSigningPage() {
   const navigate = useNavigate();
-  const { state, dispatch } = useCheckin();
+  const dispatch = useDispatch();
+
+  const state = useSelector((state: RootState) => state.checkin);
 
   const [formData, setFormData] = useState<FormData>({
     name: `${state.basicDetails.firstName} ${state.basicDetails.lastName}`.trim(),
     company: state.companyDetails.companyName,
-    date: new Date().toLocaleDateString(),
+    address: state.companyDetails.address,
+    date: new Date().toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }),
     signature: state.nda.signature || "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       name: `${state.basicDetails.firstName} ${state.basicDetails.lastName}`.trim(),
       company: state.companyDetails.companyName,
-      date: new Date().toLocaleDateString(),
+      address: state.companyDetails.address,
+      date: new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }),
     }));
   }, [state.basicDetails, state.companyDetails]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
-
-    if (!formData.company.trim()) {
-      newErrors.company = "Company is required";
-    }
-
-    if (!formData.date.trim()) {
-      newErrors.date = "Date is required";
-    }
-
-    if (!formData.signature.trim()) {
-      newErrors.signature = "Signature is required";
-    }
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.company.trim()) newErrors.company = "Company is required";
+    if (!formData.address.trim()) newErrors.address = "Address is required";
+    if (!formData.date.trim()) newErrors.date = "Date is required";
+    if (!formData.signature.trim()) newErrors.signature = "Signature is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  const handleSignatureSave = (signature: string) => {
+    setFormData((prev) => ({ ...prev, signature }));
+    if (errors.signature) setErrors((prev) => ({ ...prev, signature: undefined }));
   };
 
   const handleAccept = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (validateForm()) {
-      dispatch({
-        type: "UPDATE_STATE",
-        payload: { nda: { ...formData, accepted: true } },
-      });
-      console.log(state);
-      navigate("/visitor-entry-exit/checkin/print-badge");
+    if (!validateForm()) return;
+
+    // Validate previous steps
+    if (
+      !state.basicDetails.firstName.trim() ||
+      !state.basicDetails.lastName.trim() ||
+      !state.basicDetails.email.trim() ||
+      !state.basicDetails.phone.trim()
+    ) {
+      alert("Please complete the Basic Details section first");
+      navigate("/visitor-entry-exit/checkin/basic-details");
+      return;
     }
+
+    if (
+      !state.companyDetails.companyName.trim() ||
+      !state.companyDetails.address.trim() ||
+      !state.companyDetails.hostName.trim() ||
+      !state.companyDetails.purposeOfVisit.trim()
+    ) {
+      alert("Please complete the Company Details section first");
+      navigate("/visitor-entry-exit/checkin/company-details");
+      return;
+    }
+
+    if (!state.photograph) {
+      alert("Please upload a photograph");
+      navigate("/visitor-entry-exit/checkin/photograph");
+      return;
+    }
+
+    if (!state.identityProof) {
+      alert("Please upload identity proof");
+      navigate("/visitor-entry-exit/checkin/identity-proof");
+      return;
+    }
+
+    // Generate unique ID
+    const visitorId = `VIS-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 9)}`.toUpperCase();
+
+    dispatch(
+      updateState({
+        nda: { ...formData, accepted: true },
+        id: visitorId,
+      })
+    );
+
+    console.log("Updated Redux State:", state);
+    navigate("/visitor-entry-exit/checkin/print-badge");
   };
 
   const handleCancel = () => {
-    navigate("/");
+    navigate("/visitor-entry-exit");
   };
 
   return (
@@ -105,182 +155,116 @@ export default function NdaSigningPage() {
           <CardTitle className="font-headline text-2xl">
             Non-Disclosure Agreement
           </CardTitle>
-          <CardDescription>
-            Please read and sign the agreement below to proceed.
+          <CardDescription className="flex w-full justify-between">
+            <div>Please read and sign the agreement below to proceed.</div>
+            <div className="text-lg text-gray-800">{formData.date}</div>
           </CardDescription>
         </CardHeader>
+
         <CardContent className="space-y-6">
           <ScrollArea className="h-64 w-full rounded-md border p-4">
             <h3 className="font-semibold">
               Confidentiality and Non-Disclosure Agreement
             </h3>
             <div className="text text-[#8d7c8b]">
-              <p className="mt-4 text-sm text-muted-foreground">
-                This Non-Disclosure Agreement (the "Agreement") is entered
-                into by and between VisEntry ("Disclosing Party") and the
-                visitor ("Receiving Party") for the purpose of preventing the
+              <p className="mt-4 text-sm">
+                This Non-Disclosure Agreement (the "Agreement") is entered into
+                by and between VisEntry ("Disclosing Party") and the visitor
+                ("Receiving Party") for the purpose of preventing the
                 unauthorized disclosure of Confidential Information as defined
                 below.
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                The Receiving Party hereby agrees that they will not, during
-                or after the term of this Agreement, disclose any Confidential
+              <p className="mt-2 text-sm">
+                The Receiving Party hereby agrees that they will not, during or
+                after the term of this Agreement, disclose any Confidential
                 Information to any third party for any reason or purpose
                 whatsoever without the prior written consent of the Disclosing
                 Party. Confidential Information includes all non-public
                 information, including but not limited to trade secrets,
                 business plans, and any other proprietary information.
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm">
                 The Receiving Party's obligations under this Agreement shall
-                survive the termination of any relationship between the
-                parties. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Tempore explicabo necessitatibus distinctio, porro amet
-                vero, molestiae suscipit quasi quam voluptate maxime magnam
-                animi laborum laboriosam quae in fugit quos? Aliquid fuga vero
-                voluptates veniam, architecto quisquam deleniti assumenda
-                rerum aliquam tenetur? Assumenda voluptas consectetur
-                excepturi laboriosam. Recusandae, possimus eius! Unde
-                repellendus aliquam deserunt, eius inventore dolore labore
-                molestias aperiam nulla mollitia, maiores impedit quaerat
-                ipsam. Sunt, officiis quia et at similique labore optio
-                reprehenderit voluptatem quam assumenda consectetur velit ut
-                aspernatur asperiores laudantium numquam dolorem, beatae
-                deleniti ea fuga. Voluptas neque soluta recusandae obcaecati
-                id corporis incidunt, nisi iste voluptate labore aliquam ullam
-                quae optio, rem eligendi error? Aperiam tempora voluptate
-                alias consectetur fugiat obcaecati reprehenderit praesentium,
-                quaerat at illo quis earum culpa laborum? Rerum eos quod,
-                velit ut voluptatum ab saepe culpa repellat rem obcaecati
-                consequatur, atque veritatis error consequuntur, recusandae
-                harum mollitia. Consequuntur molestiae mollitia esse quam iure
-                eveniet doloribus? Odit quisquam odio eos quasi reiciendis
-                voluptatibus quaerat quam maxime dolorem tenetur excepturi
-                minima temporibus, ad sapiente iusto quod fuga repellendus
-                modi at. Harum nobis error magnam molestiae debitis. Vero
-                pariatur quam ut. Blanditiis beatae aperiam voluptas animi
-                soluta eaque placeat. Explicabo incidunt iure neque eum!
-                Magnam tempore pariatur temporibus facilis dolore at facere
-                voluptates id officia amet voluptatum vero, ut recusandae
-                saepe eos esse suscipit quas reprehenderit optio est
-                cupiditate reiciendis. Explicabo ipsam facilis deserunt
-                tempora inventore ad aut, architecto minus velit adipisci
-                deleniti laudantium sit dignissimos vero accusamus harum ea
-                non sequi cupiditate fugit quos eveniet. Voluptas cumque
-                officiis deserunt dolorum amet? Illo et maiores fugit quis,
-                commodi labore modi? Itaque ea voluptate nesciunt voluptas.
-                Odit quis cum esse illum eaque mollitia consequuntur labore,
-                delectus asperiores repudiandae. Quas assumenda tempore
-                reiciendis esse. Eum, perspiciatis repellendus recusandae
-                earum quia assumenda sunt provident error ad? Nisi, ratione
-                consectetur sapiente harum tempora, fugit, expedita ad minima
-                voluptate a laborum odit impedit est! Nesciunt qui labore ex,
-                hic nostrum cumque eius saepe? Odit, ut dolore ab quia
-                molestias reiciendis perspiciatis enim qui obcaecati
-                exercitationem neque distinctio reprehenderit officiis quidem,
-                adipisci dolorum aperiam rerum quam aliquam molestiae. Illum
-                quaerat accusamus cupiditate omnis nam, nulla tempore
-                accusantium ipsum asperiores sunt voluptatum est vel facere
-                voluptates. Beatae necessitatibus corrupti placeat, tempora
-                sint voluptatibus atque aliquid, maxime porro tempore
-                doloremque totam eum exercitationem molestiae doloribus?
-                Voluptatibus officia facere magni eaque? Recusandae maiores
-                delectus autem asperiores et tempora! Dolore nostrum sint
-                deserunt pariatur esse quisquam cupiditate ut totam error,
-                omnis dolores accusamus repellendus quidem nesciunt vel,
-                accusantium consectetur est itaque expedita rerum animi
-                explicabo ipsam? Laudantium vel provident beatae eligendi quod
-                dolorem consectetur. Pariatur nemo nesciunt amet non
-                repudiandae ipsum doloribus aliquid, soluta minus quam! Magni
-                vel beatae rem. Enim provident ratione exercitationem deserunt
-                vitae dignissimos aspernatur repellat tenetur sapiente, soluta
-                quas quia eaque minus modi molestias laudantium ab sequi iure
-                maiores. Optio magnam numquam quis in sequi ut ipsa, hic
-                corrupti voluptas quos minus sunt nemo possimus assumenda
-                vitae, natus nobis obcaecati voluptates beatae dolore
-                perspiciatis cupiditate excepturi. Cum libero rem dignissimos
-                aliquid facilis!
+                survive the termination of any relationship between the parties.
+              </p>
+              <p className="mt-2 text-sm">
+                By signing below, the Receiving Party acknowledges they have
+                read and agree to the terms outlined herein.
               </p>
             </div>
           </ScrollArea>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label htmlFor="name" className="text-sm font-medium leading-none">
                 Name
               </label>
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.currentTarget.value)}
+                onChange={(e) => handleInputChange("name", e.currentTarget.value)}
                 className={errors.name ? "border-red-500" : ""}
               />
               {errors.name && (
-                <p className="text-sm font-medium text-red-500 mt-1">{errors.name}</p>
+                <p className="text-sm text-red-500 mt-1">{errors.name}</p>
               )}
-            </div>
 
-            <div>
-              <label htmlFor="company" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label htmlFor="company" className="text-sm font-medium leading-none mt-4 block">
                 Company
               </label>
               <Input
                 id="company"
                 value={formData.company}
-                onChange={(e) => handleInputChange('company', e.currentTarget.value)}
+                onChange={(e) => handleInputChange("company", e.currentTarget.value)}
                 className={errors.company ? "border-red-500" : ""}
               />
               {errors.company && (
-                <p className="text-sm font-medium text-red-500 mt-1">{errors.company}</p>
+                <p className="text-sm text-red-500 mt-1">{errors.company}</p>
               )}
-            </div>
 
-            <div>
-              <label htmlFor="date" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Date
+              <label htmlFor="address" className="text-sm font-medium leading-none mt-4 block">
+                Address
               </label>
               <Input
-                id="date"
-                value={formData.date}
-                readOnly
-                className={errors.date ? "border-red-500" : ""}
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.currentTarget.value)}
+                className={errors.address ? "border-red-500" : ""}
               />
-              {errors.date && (
-                <p className="text-sm font-medium text-red-500 mt-1">{errors.date}</p>
+              {errors.address && (
+                <p className="text-sm text-red-500 mt-1">{errors.address}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="signature" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label className="text-sm font-medium leading-none">
                 Signature
               </label>
-              <Input
-                id="signature"
-                placeholder="Type your full name to sign"
-                value={formData.signature}
-                onChange={(e) => handleInputChange('signature', e.currentTarget.value)}
-                className={errors.signature ? "border-red-500" : ""}
+              <SignatureCanvas
+                onSave={handleSignatureSave}
+                initialSignature={formData.signature}
               />
               {errors.signature && (
-                <p className="text-sm font-medium text-red-500 mt-1">{errors.signature}</p>
+                <p className="text-sm text-red-500 mt-1">{errors.signature}</p>
               )}
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <div>
+
+        <CardFooter className="flex justify-between gap-5">
+          <Button variant="outline" onClick={() => navigate(-1)}>
+            Back
+          </Button>
+          <div className="space-x-2 flex">
             <Button
-              size="default"
-              variant="outline"
-              onClick={() => navigate(-1)}
+              variant="destructive"
+              size="sm"
+              type="button"
+              onClick={handleCancel}
             >
-              Back
-            </Button>
-          </div>
-            <div className="space-x-2 flex">
-            <Button variant="destructive" size={"sm"} type="button" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button size={"sm"} variant="default" type="submit">
+            <Button size="sm" variant="default" type="submit">
               Accept & Continue
             </Button>
           </div>

@@ -23,11 +23,16 @@ import GatePassEquipmentPage from "./app/(authenticated)/gate-pass/equipment/pag
 import GatePassNdaSigningPage from "./app/(authenticated)/gate-pass/nda-signing/page";
 import GatePassPrintBadgePage from "./app/(authenticated)/gate-pass/print-badge/page";
 import LoginPage from "./app/page";
-import AddVisitorPage from "./app/(authenticated)/gate-pass/adding-members/adding-members";
 import GatePassMemberBasicDetailsPage from "./app/(authenticated)/gate-pass/adding-members/member-basic-details/page";
 import GatePassMemberPhotographPage from "./app/(authenticated)/gate-pass/adding-members/member-photograph/page";
 import GatePassMemberIdentityProofPage from "./app/(authenticated)/gate-pass/adding-members/member-identity-proof/page";
 import GatePassMemberEquipmentPage from "./app/(authenticated)/gate-pass/adding-members/member-equipment/page";
+import GatePassAddVisitorPage from "./app/(authenticated)/gate-pass/adding-members/adding-members";
+import AddVisitorPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/adding-members";
+import MemberBasicDetailsPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-basic-details/page";
+import MemberPhotographPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-photograph/page";
+import MemberIdentityProofPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-identity-proof/page";
+import MemberEquipmentPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-equipment/page";
 
 const routes = createBrowserRouter([
   {
@@ -83,6 +88,46 @@ const routes = createBrowserRouter([
     element: (
       <CheckinLayout>
         <EquipmentPage />
+      </CheckinLayout>
+    ),
+  },
+    {
+    path: "/visitor-entry-exit/checkin/add-members",
+    element: (
+      <CheckinLayout>
+        <AddVisitorPage />
+      </CheckinLayout>
+    ),
+  },
+    {
+    path: "/visitor-entry-exit/checkin/add-members/:index/basic-details",
+    element: (
+      <CheckinLayout>
+        <MemberBasicDetailsPage />
+      </CheckinLayout>
+    ),
+  },
+  {
+    path: "/visitor-entry-exit/checkin/add-members/:index/photograph",
+    element: (
+      <CheckinLayout>
+        <MemberPhotographPage />
+      </CheckinLayout>
+    ),
+  },
+  {
+    path: "/visitor-entry-exit/checkin/add-members/:index/identity-proof",
+    element: (
+      <CheckinLayout>
+        <MemberIdentityProofPage />
+      </CheckinLayout>
+    ),
+  },
+  {
+    path: "/visitor-entry-exit/checkin/add-members/:index/equipment",
+    element: (
+      <CheckinLayout>
+        <MemberEquipmentPage />
       </CheckinLayout>
     ),
   },
@@ -150,7 +195,7 @@ const routes = createBrowserRouter([
     path: "/gate-pass/add-members",
     element: (
       <GatePassLayout>
-        <AddVisitorPage />
+        <GatePassAddVisitorPage />
       </GatePassLayout>
     ),
   },

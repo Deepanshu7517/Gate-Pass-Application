@@ -35,15 +35,13 @@ export const CheckinLayout: React.FC<CheckinLayoutProps> = ({ children }) => {
   const currentStep = stepPaths.indexOf(pathname);
 
   return (
-    <CheckinProvider>
-      <AppLayout>
-        <div className="flex h-full flex-col items-center justify-start">
-          <div className="w-full max-w-4xl space-y-8">
-            <Stepper steps={steps} currentStep={currentStep} />
-            <div className="flex justify-center">{children}</div>
-          </div>
+    <AppLayout>
+      <div className="flex h-full flex-col items-center justify-start">
+        <div className="w-full max-w-4xl space-y-8">
+          <Stepper steps={steps} currentStep={currentStep} />
+          <div className="flex justify-center">{children}</div>
         </div>
-      </AppLayout>
-    </CheckinProvider>
+      </div>
+    </AppLayout>
   );
 };

@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { useCheckin } from "../../../../../context/checkin-context";
+import { useCheckin } from "../../../../../hooks/useCheckIn";
 import { Button } from "../../../../../components/ui/button";
 import {
   Card,
@@ -11,6 +11,7 @@ import {
 } from "../../../../../components/ui/card";
 import { Input } from "../../../../../components/ui/input";
 import { Textarea } from "../../../../../components/ui/textarea";
+import { useToast } from "../../../../../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 type FormData = {
@@ -29,9 +30,13 @@ type FormErrors = {
 
 export default function CompanyDetailsPage() {
   const navigate = useNavigate();
-  const { state, dispatch } = useCheckin();
+  const { checkinState, updateCompanyDetails } = useCheckin();
+  const { toast } = useToast();
 
-  const [formData, setFormData] = useState<FormData>(state.companyDetails);
+  // Initialize form data from Redux state (parent/primary visitor company details)
+  const [formData, setFormData] = useState<FormData>(
+    checkinState.companyDetails
+  );
   const [errors, setErrors] = useState<FormErrors>({});
 
   const validateForm = (): boolean => {
@@ -62,23 +67,29 @@ export default function CompanyDetailsPage() {
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
-      dispatch({
-        type: "UPDATE_STATE",
-        payload: { companyDetails: formData },
+      // Update Redux store with company details
+      updateCompanyDetails(formData);
+
+      // Log the complete check-in data (from Redux state + new form data)
+
+      toast({
+        title: "Gate Pass Requested",
+        description: "The visitor has been added to the pending list.",
       });
-      console.log(state);
+      console.log(checkinState);
+      // Navigate to the next page
       navigate("/visitor-entry-exit/checkin/photograph");
     }
   };
@@ -91,84 +102,108 @@ export default function CompanyDetailsPage() {
             Company & Visit Details
           </CardTitle>
           <CardDescription>
-            Please enter information about the visitor's company and purpose
-            of visit.
+            Please enter information about the visitor's company and purpose of
+            visit.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label htmlFor="companyName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <label
+              htmlFor="companyName"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Company Name
             </label>
             <Input
               id="companyName"
               placeholder="Acme Inc."
               value={formData.companyName}
-              onChange={(e) => handleInputChange('companyName', e.currentTarget.value)}
+              onChange={(e) =>
+                handleInputChange("companyName", e.currentTarget.value)
+              }
               className={errors.companyName ? "border-red-500" : ""}
             />
             {errors.companyName && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.companyName}</p>
+              <p className="text-sm font-medium text-red-500 mt-1">
+                {errors.companyName}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="address" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <label
+              htmlFor="address"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Company Address
             </label>
             <Input
               id="address"
               placeholder="123 Main St, Anytown, USA"
               value={formData.address}
-              onChange={(e) => handleInputChange('address', e.currentTarget.value)}
+              onChange={(e) =>
+                handleInputChange("address", e.currentTarget.value)
+              }
               className={errors.address ? "border-red-500" : ""}
             />
             {errors.address && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.address}</p>
+              <p className="text-sm font-medium text-red-500 mt-1">
+                {errors.address}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="hostName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <label
+              htmlFor="hostName"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Host Name
             </label>
             <Input
               id="hostName"
               placeholder="Jane Doe"
               value={formData.hostName}
-              onChange={(e) => handleInputChange('hostName', e.currentTarget.value)}
+              onChange={(e) =>
+                handleInputChange("hostName", e.currentTarget.value)
+              }
               className={errors.hostName ? "border-red-500" : ""}
             />
             {errors.hostName && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.hostName}</p>
+              <p className="text-sm font-medium text-red-500 mt-1">
+                {errors.hostName}
+              </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="purposeOfVisit" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <label
+              htmlFor="purposeOfVisit"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Purpose of Visit
             </label>
             <Textarea
               id="purposeOfVisit"
-              className="border-[#d4d7de] bg-[#eef0f2] focus:ring-[#4051b5]"
               placeholder="Scheduled meeting to discuss Q3 project."
               value={formData.purposeOfVisit}
-              onChange={(e) => handleInputChange('purposeOfVisit', e.currentTarget.value)}
+              onChange={(e) =>
+                handleInputChange("purposeOfVisit", e.currentTarget.value)
+              }
+              className={errors.purposeOfVisit ? "border-red-500" : ""}
             />
             {errors.purposeOfVisit && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.purposeOfVisit}</p>
+              <p className="text-sm font-medium text-red-500 mt-1">
+                {errors.purposeOfVisit}
+              </p>
             )}
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button
-            size="default"
-            variant="outline"
-            onClick={() => navigate(-1)}
-          >
+          <Button variant="outline" onClick={() => navigate(-1)}>
             Back
           </Button>
-          <Button size="default" variant="default" type="submit">
+          <Button variant="default" type="submit">
             Next
           </Button>
         </CardFooter>
