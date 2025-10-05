@@ -6,7 +6,9 @@ const steps = [
   { name: "Photograph" },
   { name: "Identity Proof" },
   { name: "Equipment" },
+  { name: "Add Member" },
   { name: "NDA" },
+  { name: "Visit Area" },
   { name: "Print Badge" },
 ];
 
@@ -16,7 +18,9 @@ const stepPaths = [
   "/gate-pass/photograph",
   "/gate-pass/identity-proof",
   "/gate-pass/equipment",
+  "/gate-pass/add-member",
   "/gate-pass/nda-signing",
+  "/gate-pass/add-members",
   "/gate-pass/print-badge",
 ];
 

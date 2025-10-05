@@ -147,7 +147,7 @@ export default function AddVisitorPage() {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                            <div className="h-full w-full bg-gray-200 flex items-center justify-center ">
                               <User className="h-5 w-5 text-gray-500" />
                             </div>
                           )}
@@ -175,9 +175,9 @@ export default function AddVisitorPage() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-8 border-2 border-dashed rounded-lg">
-            <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No team members added</h3>
+          <div className="text-center py-8  rounded-lg border-2 border-[#d4d7de] ">
+            <Users className="mx-auto h-12 w-12 text-muted-foreground " />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 ">No team members added</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Get started by adding a team member to accompany the primary visitor.
             </p>

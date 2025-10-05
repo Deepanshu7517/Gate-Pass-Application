@@ -8,6 +8,7 @@ import {
   updateIdentityProof,
   updateEquipment,
   updateNda,
+  updatePlaceToVisit,
   addNewMember,
   updateMember,
   removeMember,
@@ -77,6 +78,13 @@ export const useCheckin = () => {
     [dispatch]
   );
 
+  const updatePlaceToVisitHelper = useCallback(
+    (place: string | null) => {
+      dispatch(updatePlaceToVisit(place));
+    },
+    [dispatch]
+  );
+
   const updateEquipmentHelper = useCallback(
     (equipment: CheckinState['equipment']) => {
       dispatch(updateEquipment(equipment));
@@ -123,7 +131,6 @@ export const useCheckin = () => {
     // State
     checkinState,
     isLoading: false, // Redux doesn't need loading state for hydration
-
     // Main state setters (matching original Context API)
     setCheckinState,
     resetCheckinState: handleResetCheckinState,
@@ -136,6 +143,7 @@ export const useCheckin = () => {
     updateIdentityProof: updateIdentityProofHelper,
     updateEquipment: updateEquipmentHelper,
     updateNda: updateNdaHelper,
+    updatePlaceToVisit: updatePlaceToVisitHelper,
     updateMember: updateMemberHelper,
     removeMember: removeMemberHelper,
     setCurrentMemberIndex: setCurrentMemberIndexHelper,

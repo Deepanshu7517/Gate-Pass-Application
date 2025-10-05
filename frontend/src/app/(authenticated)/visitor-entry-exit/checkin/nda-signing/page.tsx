@@ -141,7 +141,7 @@ export default function NdaSigningPage() {
     );
 
     console.log("Updated Redux State:", state);
-    navigate("/visitor-entry-exit/checkin/print-badge");
+    navigate("/visitor-entry-exit/checkin/place-to-visit");
   };
 
   const handleCancel = () => {

@@ -38,14 +38,15 @@ export type CheckinState = {
     mechanical: Equipment[];
   };
   members: Member[] | null;
-  currentMemberIndex: number | null  
+  currentMemberIndex: number | null;
   nda: {
-    signature: string|null;
+    signature: string | null;
     date: string;
     name: string;
     company: string;
     address: string;
     accepted: boolean;
   };
+  placeToVisit: string | null;
   id: string | null;
 };

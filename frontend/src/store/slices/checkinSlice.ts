@@ -30,6 +30,7 @@ const initialState: CheckinState = {
     address: '',
     accepted: false,
   },
+  placeToVisit:null,
   id: null,
 };
 
@@ -61,7 +62,7 @@ const checkinSlice = createSlice({
     updateIdentityProof: (state, action: PayloadAction<string | null>) => {
       state.identityProof = action.payload;
     },
-
+    
     // Update equipment
     updateEquipment: (state, action: PayloadAction<CheckinState['equipment']>) => {
       state.equipment = action.payload;
@@ -70,6 +71,11 @@ const checkinSlice = createSlice({
     // Update NDA
     updateNda: (state, action: PayloadAction<Partial<CheckinState['nda']>>) => {
       state.nda = { ...state.nda, ...action.payload };
+    },
+
+    // Update place to visit
+    updatePlaceToVisit: (state, action: PayloadAction<string | null>) => {
+      state.placeToVisit = action.payload;
     },
 
     // Add new member
@@ -132,6 +138,7 @@ export const {
   updateIdentityProof,
   updateEquipment,
   updateNda,
+  updatePlaceToVisit,
   addNewMember,
   updateMember,
   removeMember,

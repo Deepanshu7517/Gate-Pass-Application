@@ -33,6 +33,7 @@ import MemberBasicDetailsPage from "./app/(authenticated)/visitor-entry-exit/che
 import MemberPhotographPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-photograph/page";
 import MemberIdentityProofPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-identity-proof/page";
 import MemberEquipmentPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-equipment/page";
+import PlaceToVisitPage from "./app/(authenticated)/visitor-entry-exit/checkin/visit-area/page";
 
 const routes = createBrowserRouter([
   {
@@ -136,6 +137,14 @@ const routes = createBrowserRouter([
     element: (
       <CheckinLayout>
         <NdaSigningPage />
+      </CheckinLayout>
+    ),
+  },
+  {
+    path: "/visitor-entry-exit/checkin/place-to-visit",
+    element: (
+      <CheckinLayout>
+        <PlaceToVisitPage />
       </CheckinLayout>
     ),
   },

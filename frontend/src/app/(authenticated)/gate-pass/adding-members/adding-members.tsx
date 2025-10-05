@@ -79,7 +79,7 @@ export default function GatePassAddVisitorPage() {
                   <TableHead>Photo</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  {/* <TableHead className="text-right">Actions</TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -106,12 +106,12 @@ export default function GatePassAddVisitorPage() {
                     <span className="ml-2 text-xs text-gray-500">(Primary)</span>
                   </TableCell>
                   <TableCell>{checkinState.basicDetails.email || "N/A"}</TableCell>
-                  <TableCell className="text-right space-x-1">
+                  {/* <TableCell className="text-right space-x-1">
                     <Button variant="ghost" size="icon" disabled title="Primary visitor cannot be removed">
                       <UserX className="h-4 w-4 text-gray-300" />
                       <span className="sr-only">Remove Visitor</span>
                     </Button>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               </TableBody>
             </Table>
@@ -175,10 +175,10 @@ export default function GatePassAddVisitorPage() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-8 border-2 border-dashed rounded-lg">
+          <div className="text-center py-8 border-2 border-dashed rounded-lg border-[#d4d7de]">
             <Users className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No team members added</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground text-gray-500">
               Get started by adding a team member to accompany the primary visitor.
             </p>
           </div>
