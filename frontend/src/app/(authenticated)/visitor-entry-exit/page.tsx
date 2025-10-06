@@ -46,7 +46,7 @@ export default function VisitorEntryExitPage() {
               <p className="text-center text-muted-foreground text-[#8d7c8b]">
                 Process a visitor who is leaving the premises.
               </p>
-              <Button variant="destructive" disabled className="w-full " size="default">
+              <Button onClick={() => navigate("/visitor-entry-exit/checkout")} variant="destructive" className="w-full " size="default">
                 Check Out
               </Button>
             </div>

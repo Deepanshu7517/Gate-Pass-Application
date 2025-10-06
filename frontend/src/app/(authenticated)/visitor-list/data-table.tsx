@@ -1,15 +1,17 @@
-import * as React from "react";
+
+import * as React from "react"
 import {
   type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table";
+} from "@tanstack/react-table"
 
 import {
   Table,
@@ -18,23 +20,30 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../../components/ui/table";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
+} from "../../../components/ui/table"
+import { Button } from "../../../components/ui/button"
+import { Input } from "../../../components/ui/input"
+import { ChevronDown } from "lucide-preact"
+import type { Visitor } from "./columns";
+
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[]
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends Visitor, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  );
+  )
+    const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({})
+    const [globalFilter, setGlobalFilter] = React.useState("")
+
 
   const table = useReactTable({
     data,
@@ -45,94 +54,110 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+        const name = row.getValue('name') as string;
+        const id = row.getValue('id') as string;
+        return name.toLowerCase().includes(filterValue.toLowerCase()) || id.toLowerCase().includes(filterValue.toLowerCase());
+    },
     state: {
       sorting,
       columnFilters,
+      columnVisibility,
+      globalFilter,
     },
-  });
+  })
+
+  const getRowColor = (status: Visitor["status"]) => {
+    switch (status) {
+      case "Checked In":
+        return "bg-green-200 hover:bg-green-300/80";
+      case "Checked Out":
+        return "bg-slate-200 hover:bg-slate-300/80";
+      case "Expected":
+        return "bg-blue-200 hover:bg-blue-300/80 ";
+      default:
+        return "hover:bg-muted/50";
+    }
+  }
 
   return (
     <div>
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter by name..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.currentTarget.value)
-          }
-          className="max-w-sm"
-        />
-      </div>
-      <div className="rounded-md border-[#d4d7de] border">
-        <Table >
-          <TableHeader className={"border-[#d4d7de] text-[#8d7c8b]"}>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className={"border-[#d4d7de]"} key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead className={"border-[#d4d7de]"} key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                className={"border-[#d4d7de]"}
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell className={"border-[#d4d7de]"} key={cell.id}>
-                      
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+        <div className="flex items-center py-4">
+            <Input
+            placeholder="Filter by name or visitor ID..."
+            value={globalFilter ?? ""}
+            onChange={(event) =>
+                setGlobalFilter(event.currentTarget.value)
+            }
+            className="max-w-sm"
+            />
+
+        </div>
+        <div className="rounded-md border border-[#d4d7de]">
+            <Table>
+                <TableHeader className={"text-gray-500"}>
+                {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                        return (
+                        <TableHead key={header.id}>
+                            {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                                )}
+                        </TableHead>
+                        )
+                    })}
+                    </TableRow>
+                ))}
+                </TableHeader>
+                <TableBody>
+                {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                    <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                        className={getRowColor(row.original.status)}
+                    >
+                        {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                        ))}
+                    </TableRow>
+                    ))
+                ) : (
+                    <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                        No results.
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+                    </TableRow>
+                )}
+                </TableBody>
+            </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 py-4 ">
+            <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            >
+            Previous
+            </Button>
+            <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            >
+            Next
+            </Button>
       </div>
     </div>
-  );
+  )
 }

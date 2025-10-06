@@ -34,6 +34,7 @@ import MemberPhotographPage from "./app/(authenticated)/visitor-entry-exit/check
 import MemberIdentityProofPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-identity-proof/page";
 import MemberEquipmentPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-equipment/page";
 import PlaceToVisitPage from "./app/(authenticated)/visitor-entry-exit/checkin/visit-area/page";
+import CheckoutPage from "./app/(authenticated)/visitor-entry-exit/checkout/page";
 
 const routes = createBrowserRouter([
   {
@@ -153,6 +154,14 @@ const routes = createBrowserRouter([
     element: (
       <CheckinLayout>
         <PrintBadgePage />
+      </CheckinLayout>
+    ),
+  },
+  {
+    path: "/visitor-entry-exit/checkout",
+    element: (
+      <CheckinLayout>
+        <CheckoutPage />
       </CheckinLayout>
     ),
   },

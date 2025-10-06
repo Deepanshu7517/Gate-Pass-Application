@@ -1,3 +1,4 @@
+
 import type { Visitor } from "./columns";
 
 export const data: Visitor[] = [
@@ -5,6 +6,7 @@ export const data: Visitor[] = [
         id: "VIS-001",
         name: "Alice Johnson",
         email: "alice.j@innovate.com",
+        phone: "9717695400",
         company: "Innovate Inc.",
         host: "Bob Williams",
         purpose: "Project meeting",
@@ -13,9 +15,10 @@ export const data: Visitor[] = [
         status: "Checked Out",
     },
     {
-        id: "VIS-002",
+        id: "VIS-002345234-0967",
         name: "Charlie Davis",
         email: "charlie.d@solutions.co",
+        phone: "444-555-6666",
         company: "Solutions Co.",
         host: "Diana Miller",
         purpose: "Sales demo",
@@ -27,6 +30,7 @@ export const data: Visitor[] = [
         id: "VIS-003",
         name: "Eve Smith",
         email: "eve.s@techforward.com",
+        phone: "777-888-9999",
         company: "Tech Forward",
         host: "Frank White",
         purpose: "Technical support",
@@ -38,6 +42,7 @@ export const data: Visitor[] = [
         id: "VIS-004",
         name: "George Brown",
         email: "george.b@datasys.com",
+        phone: "123-456-7890",
         company: "Data Systems",
         host: "Heidi Green",
         purpose: "Interview",
@@ -49,6 +54,7 @@ export const data: Visitor[] = [
         id: "VIS-005",
         name: "Ivy Black",
         email: "ivy.b@nextgen.com",
+        phone: "098-765-4321",
         company: "NextGen Solutions",
         host: "Jack Blue",
         purpose: "Partnership discussion",
@@ -60,6 +66,7 @@ export const data: Visitor[] = [
         id: "VIS-006",
         name: "John Doe",
         email: "john.d@acme.com",
+        phone: "555-555-5555",
         company: "Acme Corp",
         host: "Jane Smith",
         purpose: "Quarterly review",
@@ -71,6 +78,7 @@ export const data: Visitor[] = [
         id: "VIS-007",
         name: "Peter Jones",
         email: "peter.j@globaltech.com",
+        phone: "112-233-4455",
         company: "Global Tech",
         host: "Susan Chen",
         purpose: "Client visit",
