@@ -40,7 +40,7 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
             {index < currentStep ? (
               // COMPLETED STEP
               <div
-                className="relative flex h-8 w-8 items-center justify-center rounded-full"
+                className="relative flex h-6 w-6 items-center justify-center rounded-full"
                 style={{backgroundColor: PRIMARY_COLOR}}
               >
                 <Check className="h-5 w-5 text-white" aria-hidden="true" />

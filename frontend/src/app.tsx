@@ -35,6 +35,7 @@ import MemberIdentityProofPage from "./app/(authenticated)/visitor-entry-exit/ch
 import MemberEquipmentPage from "./app/(authenticated)/visitor-entry-exit/checkin/adding-members/member-equipment/page";
 import PlaceToVisitPage from "./app/(authenticated)/visitor-entry-exit/checkin/visit-area/page";
 import CheckoutPage from "./app/(authenticated)/visitor-entry-exit/checkout/page";
+import AppLayout from "./app/(authenticated)/layout";
 
 const routes = createBrowserRouter([
   {
@@ -160,9 +161,9 @@ const routes = createBrowserRouter([
   {
     path: "/visitor-entry-exit/checkout",
     element: (
-      <CheckinLayout>
+      <AppLayout>
         <CheckoutPage />
-      </CheckinLayout>
+      </AppLayout>
     ),
   },
   {

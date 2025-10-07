@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../../../components/ui/card";
-import { Printer } from "lucide-preact";
+import { Printer, ArrowLeft } from "lucide-preact"; // Added ArrowLeft
 import { useToast } from "../../../../../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -19,7 +19,7 @@ export default function PrintBadgePage() {
   const dispatch = useDispatch();
   const { toast } = useToast();
 
-  // ✅ Access Redux state
+  // Access Redux state
   const state = useSelector((state: RootState) => state.checkin);
 
   const handlePrint = () => {
@@ -33,7 +33,8 @@ export default function PrintBadgePage() {
     });
 
     console.log("Visitor Check-in Complete:", state);
-    // ✅ Reset Redux state
+
+    // Reset Redux state
     dispatch(
       updateState({
         basicDetails: { firstName: "", lastName: "", email: "", phone: "" },
@@ -57,28 +58,35 @@ export default function PrintBadgePage() {
           address: "",
           accepted: false,
         },
-        members:[],
+        members: [],
         currentMemberIndex: null,
-        id:null
+        id: null,
       })
     );
 
     navigate("/visitor-entry-exit");
   };
 
+  // --- Incomplete Information Card ---
   if (!state.nda.accepted) {
     return (
-      <Card className="w-full max-w-lg shadow-lg">
+      // Card size: max-w-lg (mobile) -> sm:max-w-xl (PC)
+      <Card className="w-full max-w-lg sm:max-w-xl shadow-lg">
         <CardHeader>
-          <CardTitle>Incomplete Information</CardTitle>
-          <CardDescription>
+          {/* Title scaling */}
+          <CardTitle className="font-headline text-2xl sm:text-3xl">
+            Incomplete Information
+          </CardTitle>
+          {/* Description scaling */}
+          <CardDescription className="text-base sm:text-lg">
             Visitor information is incomplete. Please start the check-in process
             from the beginning.
           </CardDescription>
         </CardHeader>
         <CardFooter>
+          {/* Button scaling */}
           <Button
-            className="w-full"
+            className="w-full sm:h-12 sm:text-base"
             variant="default"
             onClick={() => navigate("/gate-pass/basic-details")}
           >
@@ -89,33 +97,42 @@ export default function PrintBadgePage() {
     );
   }
 
+  // --- Main Print Badge Page ---
   return (
-    <Card className="w-full max-w-lg shadow-lg">
+    // Card size: max-w-lg (mobile) -> sm:max-w-xl (PC)
+    <Card className="w-full max-w-lg sm:max-w-xl shadow-lg">
       {/* Header section (not printed) */}
       <div className="print:hidden">
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">
+          {/* CardTitle: text-2xl (mobile) -> text-3xl (PC) */}
+          <CardTitle className="font-headline text-2xl sm:text-3xl">
             Print Visitor Badge
           </CardTitle>
-          <CardDescription>
+          {/* CardDescription: Default (mobile) -> text-lg (PC) */}
+          <CardDescription className="text-base sm:text-lg">
             Review the badge details below and then print.
           </CardDescription>
         </CardHeader>
       </div>
 
       {/* Printable Badge Section */}
-      <CardContent>
+      <CardContent className="py-4 sm:py-6">
         <div
           id="badge-to-print"
-          className="mx-auto mt-6 max-w-sm rounded-lg border-2 border-dashed p-4 border-[#d4d7de]"
+          // Badge size scaling: max-w-sm (mobile) -> sm:max-w-md (PC)
+          className="mx-auto mt-6 max-w-sm sm:max-w-md rounded-lg border-2 border-dashed p-4 sm:p-6 border-[#d4d7de]"
         >
-          <CardHeader className="text-center p-2">
-            <CardTitle className="font-headline text-xl">VISITOR</CardTitle>
+          <CardHeader className="text-center p-2 sm:p-3">
+            {/* Title scaling: text-xl (mobile) -> text-2xl (PC) */}
+            <CardTitle className="font-headline text-xl sm:text-2xl">
+              VISITOR
+            </CardTitle>
           </CardHeader>
 
-          <CardContent className="flex flex-col items-center space-y-4 p-2">
-            {/* Photograph */}
-            <div className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-[#4651b5]">
+          {/* Content scaling */}
+          <CardContent className="flex flex-col items-center space-y-4 sm:space-y-6 p-2 sm:p-3">
+            {/* Photograph size scaling: h-28 w-28 (mobile) -> h-36 w-36 (PC) */}
+            <div className="relative h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full border-4 border-[#4651b5]">
               {state.photograph && (
                 <img
                   src={state.photograph}
@@ -125,18 +142,18 @@ export default function PrintBadgePage() {
               )}
             </div>
 
-            {/* Visitor Info */}
+            {/* Visitor Info text scaling */}
             <div className="text-center">
-              <p className="text-xl font-bold">
+              <p className="text-xl sm:text-2xl font-bold">
                 {state.basicDetails.firstName} {state.basicDetails.lastName}
               </p>
-              <p className="text-sm text-[#8d7c8b]">
+              <p className="text-sm sm:text-base text-[#8d7c8b]">
                 {state.companyDetails.companyName}
               </p>
             </div>
 
-            {/* Host & Date Info */}
-            <div className="w-full text-xs">
+            {/* Host & Date Info text scaling */}
+            <div className="w-full text-xs sm:text-sm">
               <div className="flex justify-between border-t pt-2 border-[#d4d7de]">
                 <span className="font-semibold">HOST:</span>
                 <span className="text-[#8d7c8b]">
@@ -152,20 +169,32 @@ export default function PrintBadgePage() {
         </div>
       </CardContent>
 
-      {/* Footer (hidden when printing) */}
-      <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 print:hidden">
+      {/* Footer (hidden when printing) - Responsive layout and button scaling */}
+      <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 sm:gap-4 print:hidden pt-4 sm:pt-6">
+        {/* Back Button scaling */}
         <Button
           variant="outline"
           onClick={() => navigate(-1)}
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto sm:h-12 sm:px-6 sm:text-base"
         >
           Back
         </Button>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button variant="default" onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" /> Print Badge
+
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+          {/* Print Button scaling */}
+          <Button
+            variant="default"
+            onClick={handlePrint}
+            className="w-full sm:w-auto sm:h-12 sm:px-6 sm:text-base"
+          >
+            <Printer className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Print Badge
           </Button>
-          <Button variant="outline" onClick={handleFinish}>
+          {/* Finish Button scaling */}
+          <Button
+            variant="outline"
+            onClick={handleFinish}
+            className="w-full sm:w-auto sm:h-12 sm:px-6 sm:text-base"
+          >
             Finish & Check-In
           </Button>
         </div>

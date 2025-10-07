@@ -38,10 +38,13 @@ export default function GatePassLayout({
 
   return (
     <AppLayout>
-      <div className="flex h-full flex-col items-center justify-start">
-        <div className="w-full max-w-4xl space-y-8">
+      <div className="flex w-full flex-col items-center justify-start">
+        {/* Inner container with max width and vertical spacing (max-w-7xl, space-y-8) */}
+        <div className="w-full max-w-7xl space-y-8">
           <Stepper steps={steps} currentStep={currentStep} />
-          <div className="flex justify-center">{children}</div>
+
+          {/* Content area with horizontal padding and centering (px-4) */}
+          <div className="flex justify-center px-4">{children}</div>
         </div>
       </div>
     </AppLayout>

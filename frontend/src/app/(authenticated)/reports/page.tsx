@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import {
   Card,
@@ -120,7 +118,7 @@ export default function CheckinChart() {
           </p>
         </header>
 
-      <Card className="w-full shadow-lg hover:shadow-xl transition">
+        <Card className="w-full shadow-lg hover:shadow-xl transition">
           <CardHeader className="flex sm:flex-row sm:items-center justify-between gap-3">
             <CardTitle>Check-in Trends</CardTitle>
 

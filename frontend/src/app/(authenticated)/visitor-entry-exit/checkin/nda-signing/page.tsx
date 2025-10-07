@@ -255,7 +255,7 @@ export default function NdaSigningPage() {
           <Button variant="outline" onClick={() => navigate(-1)}>
             Back
           </Button>
-          <div className="space-x-2 flex">
+          <div className="space-x-2 flex flex-col sm:flex-row sm:space-x-2 sm:space-y-0 space-y-2 w-full sm:w-auto">
             <Button
               variant="destructive"
               size="sm"

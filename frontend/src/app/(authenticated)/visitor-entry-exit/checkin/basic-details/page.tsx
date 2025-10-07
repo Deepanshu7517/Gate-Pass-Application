@@ -11,7 +11,9 @@ import {
 } from "../../../../../components/ui/card";
 import { Input } from "../../../../../components/ui/input";
 import { useNavigate } from "react-router-dom";
+import { type ComponentChildren } from "preact"; 
 
+// --- Types from the Preact logic file ---
 type FormData = {
   firstName: string;
   lastName: string;
@@ -26,11 +28,35 @@ type FormErrors = {
   phone?: string;
 };
 
+// --- UI Helpers (Mimicking the structure and applying the desired styles) ---
+
+// Mimics FormItem/Container
+const FormItem: React.FC<{ children: ComponentChildren, className?: string }> = ({ children, className }) => (
+    <div className={className}>{children}</div>
+);
+
+// FormLabel: text-sm (mobile) -> text-base (PC)
+const FormLabel: React.FC<{ children: ComponentChildren, htmlFor: string }> = ({ children, htmlFor }) => (
+    <label 
+        htmlFor={htmlFor} 
+        className="text-sm sm:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    >
+        {children}
+    </label>
+);
+
+// Mimics FormMessage
+const FormMessage: React.FC<{ children: ComponentChildren }> = ({ children }) => (
+    <p className="text-sm font-medium text-red-500 mt-1">{children}</p>
+);
+
+// --- Component Start ---
+
 export default function BasicDetailsPage() {
   const navigate = useNavigate();
   const { checkinState, updateBasicDetails } = useCheckin();
 
-  // Initialize form data from Redux state (parent/primary visitor details)
+  // Initialize form data from Redux state
   const [formData, setFormData] = useState<FormData>(checkinState.basicDetails);
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -81,91 +107,99 @@ export default function BasicDetailsPage() {
       // Update Redux store with the form data
       updateBasicDetails(formData);
       console.log(checkinState);
-      // Navigate to next page
+      
+      // Navigate to the next page
       navigate("/visitor-entry-exit/checkin/company-details");
     }
   };
 
   return (
-    <Card className="w-full max-w-2xl shadow-lg">
+    // Card size: max-w-2xl (mobile) -> max-w-4xl (PC)
+    <Card className="w-full max-w-2xl sm:max-w-4xl shadow-lg">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">
-            Visitor Basic Details
-          </CardTitle>
-          <CardDescription>
+          {/* CardTitle: text-2xl (mobile) -> text-3xl (PC) */}
+          <CardTitle className="font-headline text-2xl sm:text-3xl">Visitor Basic Details</CardTitle>
+          {/* CardDescription: Default (mobile) -> text-lg (PC) */}
+          <CardDescription className="text-base sm:text-lg">
             Please enter the visitor's personal information.
           </CardDescription>
         </CardHeader>
+        
         <CardContent className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <label htmlFor="firstName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              First Name
-            </label>
+          
+          {/* First Name */}
+          <FormItem>
+            <FormLabel htmlFor="firstName">First Name</FormLabel>
+            {/* Input size: h-10 text-sm (mobile) -> h-12 text-base (PC) */}
             <Input
               id="firstName"
               placeholder="John"
               value={formData.firstName}
               onChange={(e) => handleInputChange('firstName', e.currentTarget.value)}
-              className={errors.firstName ? "border-red-500" : ""}
+              className={errors.firstName 
+                ? "h-10 text-sm sm:h-12 sm:text-base border-red-500" 
+                : "h-10 text-sm sm:h-12 sm:text-base"}
             />
-            {errors.firstName && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.firstName}</p>
-            )}
-          </div>
+            {errors.firstName && <FormMessage>{errors.firstName}</FormMessage>}
+          </FormItem>
           
-          <div>
-            <label htmlFor="lastName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Last Name
-            </label>
+          {/* Last Name */}
+          <FormItem>
+            <FormLabel htmlFor="lastName">Last Name</FormLabel>
             <Input
               id="lastName"
               placeholder="Doe"
               value={formData.lastName}
               onChange={(e) => handleInputChange('lastName', e.currentTarget.value)}
-              className={errors.lastName ? "border-red-500" : ""}
+              className={errors.lastName 
+                ? "h-10 text-sm sm:h-12 sm:text-base border-red-500" 
+                : "h-10 text-sm sm:h-12 sm:text-base"}
             />
-            {errors.lastName && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.lastName}</p>
-            )}
-          </div>
+            {errors.lastName && <FormMessage>{errors.lastName}</FormMessage>}
+          </FormItem>
           
-          <div className="sm:col-span-2">
-            <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Email Address
-            </label>
+          {/* Email Address (spans two columns) */}
+          <FormItem className="sm:col-span-2">
+            <FormLabel htmlFor="email">Email Address</FormLabel>
             <Input
               id="email"
               type="email"
               placeholder="john.doe@example.com"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.currentTarget.value)}
-              className={errors.email ? "border-red-500" : ""}
+              className={errors.email 
+                ? "h-10 text-sm sm:h-12 sm:text-base border-red-500" 
+                : "h-10 text-sm sm:h-12 sm:text-base"}
             />
-            {errors.email && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.email}</p>
-            )}
-          </div>
+            {errors.email && <FormMessage>{errors.email}</FormMessage>}
+          </FormItem>
           
-          <div className="sm:col-span-2">
-            <label htmlFor="phone" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Phone Number
-            </label>
+          {/* Phone Number (spans two columns) */}
+          <FormItem className="sm:col-span-2">
+            <FormLabel htmlFor="phone">Phone Number</FormLabel>
             <Input
               id="phone"
               type="tel"
               placeholder="(123) 456-7890"
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.currentTarget.value)}
-              className={errors.phone ? "border-red-500" : ""}
+              className={errors.phone 
+                ? "h-10 text-sm sm:h-12 sm:text-base border-red-500" 
+                : "h-10 text-sm sm:h-12 sm:text-base"}
             />
-            {errors.phone && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.phone}</p>
-            )}
-          </div>
+            {errors.phone && <FormMessage>{errors.phone}</FormMessage>}
+          </FormItem>
+          
         </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button size="default" variant="default" type="submit">
+        {/* CardFooter padding: pt-4 (mobile) -> pt-6 (PC) */}
+        <CardFooter className="flex justify-end pt-4 sm:pt-6">
+          {/* Button size: size="default" (mobile) -> size="lg" (PC) */}
+          <Button 
+            type="submit" 
+            size="default" 
+            // Manually apply size="lg" styles for the PC breakpoint
+          >
             Next
           </Button>
         </CardFooter>

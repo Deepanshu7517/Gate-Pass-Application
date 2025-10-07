@@ -1,18 +1,18 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { CheckinState, Member } from '../../types';
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { CheckinState, IdentityProof, Member } from "../../types";
 
 const initialState: CheckinState = {
   basicDetails: {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
   },
   companyDetails: {
-    companyName: '',
-    address: '',
-    hostName: '',
-    purposeOfVisit: '',
+    companyName: "",
+    address: "",
+    hostName: "",
+    purposeOfVisit: "",
   },
   photograph: null,
   identityProof: null,
@@ -24,18 +24,18 @@ const initialState: CheckinState = {
   currentMemberIndex: null,
   nda: {
     signature: null,
-    date: '',
-    name: '',
-    company: '',
-    address: '',
+    date: "",
+    name: "",
+    company: "",
+    address: "",
     accepted: false,
   },
-  placeToVisit:null,
+  placeToVisit: null,
   id: null,
 };
 
 const checkinSlice = createSlice({
-  name: 'checkin',
+  name: "checkin",
   initialState,
   reducers: {
     // Update entire state or partial state
@@ -44,12 +44,18 @@ const checkinSlice = createSlice({
     },
 
     // Update basic details
-    updateBasicDetails: (state, action: PayloadAction<Partial<CheckinState['basicDetails']>>) => {
+    updateBasicDetails: (
+      state,
+      action: PayloadAction<Partial<CheckinState["basicDetails"]>>
+    ) => {
       state.basicDetails = { ...state.basicDetails, ...action.payload };
     },
 
     // Update company details
-    updateCompanyDetails: (state, action: PayloadAction<Partial<CheckinState['companyDetails']>>) => {
+    updateCompanyDetails: (
+      state,
+      action: PayloadAction<Partial<CheckinState["companyDetails"]>>
+    ) => {
       state.companyDetails = { ...state.companyDetails, ...action.payload };
     },
 
@@ -59,17 +65,22 @@ const checkinSlice = createSlice({
     },
 
     // Update identity proof
-    updateIdentityProof: (state, action: PayloadAction<string | null>) => {
+    updateIdentityProof: (
+      state,
+      action: PayloadAction<IdentityProof | null>
+    ) => {
       state.identityProof = action.payload;
     },
-    
     // Update equipment
-    updateEquipment: (state, action: PayloadAction<CheckinState['equipment']>) => {
+    updateEquipment: (
+      state,
+      action: PayloadAction<CheckinState["equipment"]>
+    ) => {
       state.equipment = action.payload;
     },
 
     // Update NDA
-    updateNda: (state, action: PayloadAction<Partial<CheckinState['nda']>>) => {
+    updateNda: (state, action: PayloadAction<Partial<CheckinState["nda"]>>) => {
       state.nda = { ...state.nda, ...action.payload };
     },
 
@@ -81,17 +92,22 @@ const checkinSlice = createSlice({
     // Add new member
     addNewMember: (state) => {
       const newMember: Member = {
-        basicDetails: { firstName: '', lastName: '', email: '', phone: '' },
+        basicDetails: { firstName: "", lastName: "", email: "", phone: "" },
         photograph: null,
         identityProof: null,
         equipment: { electrical: [], mechanical: [] },
       };
-      state.members = state.members ? [...state.members, newMember] : [newMember];
+      state.members = state.members
+        ? [...state.members, newMember]
+        : [newMember];
       state.currentMemberIndex = state.members.length - 1;
     },
 
     // Update specific member
-    updateMember: (state, action: PayloadAction<{ index: number; member: Partial<Member> }>) => {
+    updateMember: (
+      state,
+      action: PayloadAction<{ index: number; member: Partial<Member> }>
+    ) => {
       if (state.members && state.members[action.payload.index]) {
         state.members[action.payload.index] = {
           ...state.members[action.payload.index],
@@ -103,11 +119,14 @@ const checkinSlice = createSlice({
     // Remove member
     removeMember: (state, action: PayloadAction<number>) => {
       if (state.members) {
-        state.members = state.members.filter((_, index) => index !== action.payload);
+        state.members = state.members.filter(
+          (_, index) => index !== action.payload
+        );
         // Adjust currentMemberIndex if needed
         if (state.currentMemberIndex !== null) {
           if (state.currentMemberIndex >= state.members.length) {
-            state.currentMemberIndex = state.members.length > 0 ? state.members.length - 1 : null;
+            state.currentMemberIndex =
+              state.members.length > 0 ? state.members.length - 1 : null;
           }
         }
       }

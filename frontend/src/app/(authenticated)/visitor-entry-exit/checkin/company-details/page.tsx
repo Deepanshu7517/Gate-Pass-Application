@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useState, useMemo, useRef, useEffect } from "preact/hooks";
 import { useCheckin } from "../../../../../hooks/useCheckIn";
 import { Button } from "../../../../../components/ui/button";
 import {
@@ -13,7 +13,25 @@ import { Input } from "../../../../../components/ui/input";
 import { Textarea } from "../../../../../components/ui/textarea";
 import { useToast } from "../../../../../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { type ComponentChildren } from "preact";
+import { Check, ChevronsUpDown } from "lucide-preact";
+import { cn } from "../../../../../lib/utils";
 
+// employee-data.ts
+export const employees = [
+  { name: "Jane Doe", post: "Project Manager" },
+  { name: "John Smith", post: "Software Engineer" },
+  { name: "Emily Johnson", post: "HR Executive" },
+  { name: "Michael Brown", post: "UX Designer" },
+  { name: "Sarah Wilson", post: "QA Analyst" },
+  { name: "David Lee", post: "DevOps Engineer" },
+  { name: "Olivia Davis", post: "Product Owner" },
+  { name: "James Miller", post: "Backend Developer" },
+  { name: "Sophia Taylor", post: "Frontend Developer" },
+  { name: "Daniel Anderson", post: "System Administrator" },
+];
+
+// --- Types ---
 type FormData = {
   companyName: string;
   address: string;
@@ -28,39 +46,62 @@ type FormErrors = {
   purposeOfVisit?: string;
 };
 
+// --- UI Helpers ---
+const FormItem: React.FC<{
+  children: ComponentChildren;
+  className?: string;
+}> = ({ children, className }) => <div className={className}>{children}</div>;
+
+const FormLabel: React.FC<{ children: ComponentChildren; htmlFor: string }> = ({
+  children,
+  htmlFor,
+}) => (
+  <label
+    htmlFor={htmlFor}
+    className="text-sm sm:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  >
+    {children}
+  </label>
+);
+
+const FormMessage: React.FC<{ children: ComponentChildren }> = ({
+  children,
+}) => <p className="text-sm font-medium text-red-500 mt-1">{children}</p>;
+
+// --- Component Start ---
 export default function CompanyDetailsPage() {
   const navigate = useNavigate();
   const { checkinState, updateCompanyDetails } = useCheckin();
   const { toast } = useToast();
 
-  // Initialize form data from Redux state (parent/primary visitor company details)
   const [formData, setFormData] = useState<FormData>(
     checkinState.companyDetails
   );
   const [errors, setErrors] = useState<FormErrors>({});
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const comboboxRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown if click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
-    // Company name validation
-    if (!formData.companyName.trim()) {
+    if (!formData.companyName.trim())
       newErrors.companyName = "Company name is required";
-    }
-
-    // Address validation
-    if (!formData.address.trim()) {
+    if (!formData.address.trim())
       newErrors.address = "Company address is required";
-    }
-
-    // Host name validation
-    if (!formData.hostName.trim()) {
-      newErrors.hostName = "Host name is required";
-    }
-
-    // Purpose of visit validation
-    if (!formData.purposeOfVisit.trim()) {
+    if (!formData.hostName.trim()) newErrors.hostName = "Host name is required";
+    if (!formData.purposeOfVisit.trim())
       newErrors.purposeOfVisit = "Purpose of visit is required";
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -68,8 +109,6 @@ export default function CompanyDetailsPage() {
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
@@ -77,43 +116,46 @@ export default function CompanyDetailsPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (validateForm()) {
-      // Update Redux store with company details
       updateCompanyDetails(formData);
-
-      // Log the complete check-in data (from Redux state + new form data)
-
       toast({
-        title: "Gate Pass Requested",
-        description: "The visitor has been added to the pending list.",
+        title: "Details Saved",
+        description: "Company and visit information recorded.",
       });
       console.log(checkinState);
-      // Navigate to the next page
       navigate("/visitor-entry-exit/checkin/photograph");
     }
   };
 
+  const inputClassNames = (field: keyof FormErrors) =>
+    errors[field]
+      ? "h-10 text-sm sm:h-12 sm:text-base border-red-500"
+      : "h-10 text-sm sm:h-12 sm:text-base";
+
+  // ✅ Host name filtering
+  const filteredEmployees = useMemo(() => {
+    return employees.filter((emp) =>
+      `${emp.name} ${emp.post}`.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
+
   return (
-    <Card className="w-full max-w-2xl shadow-lg">
+    <Card className="w-full max-w-2xl sm:max-w-4xl shadow-lg">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">
+          <CardTitle className="font-headline text-2xl sm:text-3xl">
             Company & Visit Details
           </CardTitle>
-          <CardDescription>
-            Please enter information about the visitor's company and purpose of
+          <CardDescription className="text-base sm:text-lg">
+            Please enter information about the visiting company and purpose of
             visit.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <label
-              htmlFor="companyName"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Company Name
-            </label>
+
+        <CardContent className="space-y-4 sm:space-y-6">
+          {/* Company Name */}
+          <FormItem>
+            <FormLabel htmlFor="companyName">Company Name</FormLabel>
             <Input
               id="companyName"
               placeholder="Acme Inc."
@@ -121,22 +163,16 @@ export default function CompanyDetailsPage() {
               onChange={(e) =>
                 handleInputChange("companyName", e.currentTarget.value)
               }
-              className={errors.companyName ? "border-red-500" : ""}
+              className={inputClassNames("companyName")}
             />
             {errors.companyName && (
-              <p className="text-sm font-medium text-red-500 mt-1">
-                {errors.companyName}
-              </p>
+              <FormMessage>{errors.companyName}</FormMessage>
             )}
-          </div>
+          </FormItem>
 
-          <div>
-            <label
-              htmlFor="address"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Company Address
-            </label>
+          {/* Company Address */}
+          <FormItem>
+            <FormLabel htmlFor="address">Company Address</FormLabel>
             <Input
               id="address"
               placeholder="123 Main St, Anytown, USA"
@@ -144,45 +180,79 @@ export default function CompanyDetailsPage() {
               onChange={(e) =>
                 handleInputChange("address", e.currentTarget.value)
               }
-              className={errors.address ? "border-red-500" : ""}
+              className={inputClassNames("address")}
             />
-            {errors.address && (
-              <p className="text-sm font-medium text-red-500 mt-1">
-                {errors.address}
-              </p>
-            )}
-          </div>
+            {errors.address && <FormMessage>{errors.address}</FormMessage>}
+          </FormItem>
 
-          <div>
-            <label
-              htmlFor="hostName"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Host Name
-            </label>
-            <Input
-              id="hostName"
-              placeholder="Jane Doe"
-              value={formData.hostName}
-              onChange={(e) =>
-                handleInputChange("hostName", e.currentTarget.value)
-              }
-              className={errors.hostName ? "border-red-500" : ""}
-            />
-            {errors.hostName && (
-              <p className="text-sm font-medium text-red-500 mt-1">
-                {errors.hostName}
-              </p>
-            )}
-          </div>
+          {/* ✅ Host Name (Combobox Implementation) */}
+          <FormItem>
+            <FormLabel htmlFor="hostName">Host Name</FormLabel>
+            <div ref={comboboxRef} className="relative">
+              <Button
+                type="button"
+                variant="outline"
+                className={cn(
+                  "w-full justify-between text-left font-normal",
+                  !formData.hostName && "text-muted-foreground",
+                  inputClassNames("hostName")
+                )}
+                onClick={() => setOpen(!open)}
+              >
+                {formData.hostName || "Select or search for a host..."}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
 
-          <div>
-            <label
-              htmlFor="purposeOfVisit"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Purpose of Visit
-            </label>
+              {open && (
+                <div className="absolute z-50 mt-2 w-full rounded-md border bg-white shadow-lg border-gray-300">
+                  <div className="p-2">
+                    <Input
+                      placeholder="Search host..."
+                      value={search}
+                      onInput={(e) => setSearch(e.currentTarget.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <ul className="max-h-60 overflow-y-auto">
+                    {filteredEmployees.length > 0 ? (
+                      filteredEmployees.map((emp) => (
+                        <li
+                          key={emp.name}
+                          onClick={() => {
+                            handleInputChange("hostName", emp.name);
+                            setOpen(false);
+                            setSearch("");
+                          }}
+                          className={cn(
+                            "flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100",
+                            formData.hostName === emp.name &&
+                              "bg-gray-100 font-medium"
+                          )}
+                        >
+                          <span>{emp.name}</span>
+                          <span className="text-sm text-gray-500">
+                            {emp.post}
+                          </span>
+                          {formData.hostName === emp.name && (
+                            <Check className="h-4 w-4 text-green-600" />
+                          )}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="px-3 py-2 text-sm text-gray-500">
+                        No results found.
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+            {errors.hostName && <FormMessage>{errors.hostName}</FormMessage>}
+          </FormItem>
+
+          {/* Purpose of Visit */}
+          <FormItem>
+            <FormLabel htmlFor="purposeOfVisit">Purpose of Visit</FormLabel>
             <Textarea
               id="purposeOfVisit"
               placeholder="Scheduled meeting to discuss Q3 project."
@@ -190,20 +260,23 @@ export default function CompanyDetailsPage() {
               onChange={(e) =>
                 handleInputChange("purposeOfVisit", e.currentTarget.value)
               }
-              className={errors.purposeOfVisit ? "border-red-500" : ""}
+              className={
+                errors.purposeOfVisit
+                  ? "text-sm sm:text-base border-red-500"
+                  : "text-sm sm:text-base"
+              }
             />
             {errors.purposeOfVisit && (
-              <p className="text-sm font-medium text-red-500 mt-1">
-                {errors.purposeOfVisit}
-              </p>
+              <FormMessage>{errors.purposeOfVisit}</FormMessage>
             )}
-          </div>
+          </FormItem>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => navigate(-1)}>
+
+        <CardFooter className="flex justify-between pt-0 sm:pt-6">
+          <Button variant="outline" onClick={() => navigate(-1)} size="default">
             Back
           </Button>
-          <Button variant="default" type="submit">
+          <Button variant="default" type="submit" size="default">
             Next
           </Button>
         </CardFooter>

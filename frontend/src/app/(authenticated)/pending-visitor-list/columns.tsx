@@ -73,7 +73,6 @@ export const columns: ColumnDef<PendingVisitor>[] = [
         <div className="space-x-2">
             <Button size="sm" variant="outline" className="bg-green-500 hover:bg-green-600 text-white" onClick={handleApprove}>Approve</Button>
             <Button className={"text-white hover:opacity-80 bg-[#ef4444]"} size="sm" variant="destructive">Decline</Button>
-            
         </div>
       )
     },
