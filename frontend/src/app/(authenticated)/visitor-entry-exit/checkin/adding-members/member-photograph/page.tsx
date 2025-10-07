@@ -51,6 +51,12 @@ export default function MemberPhotographPage() {
 
   const getCameraPermission = async () => {
     try {
+      // Cleanup previous stream
+      if (videoRef.current && videoRef.current.srcObject) {
+        (videoRef.current.srcObject as MediaStream).getTracks().forEach((track) => track.stop());
+        videoRef.current.srcObject = null;
+      }
+      
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       setHasCameraPermission(true);
 
@@ -85,36 +91,34 @@ export default function MemberPhotographPage() {
   }, [photoTaken]);
 
   const handleCapture = () => {
-    if (currentMemberIndex === null) return;
+    if (currentMemberIndex === null || !videoRef.current || !canvasRef.current) return;
 
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const context = canvas.getContext("2d");
-      context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d");
+    context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-      const dataUri = canvas.toDataURL("image/jpeg");
+    const dataUri = canvas.toDataURL("image/jpeg");
 
-      // Update local state
-      setCapturedImage(dataUri);
-      setPhotoTaken(true);
+    // Update local state
+    setCapturedImage(dataUri);
+    setPhotoTaken(true);
 
-      // Update Redux store
-      updateMember(currentMemberIndex, { photograph: dataUri });
+    // Update Redux store
+    updateMember(currentMemberIndex, { photograph: dataUri });
 
-      // Stop video stream after capturing
-      if (video.srcObject) {
-        const stream = video.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => track.stop());
-      }
-
-      toast({
-        title: "Photograph Captured!",
-        description: `Photo for ${member?.basicDetails.firstName || "member"} has been saved.`,
-      });
+    // Stop video stream after capturing
+    if (video.srcObject) {
+      const stream = video.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
     }
+
+    toast({
+      title: "Photograph Captured!",
+      description: `Photo for ${member?.basicDetails.firstName || "member"} has been saved.`,
+    });
   };
 
   const handleRetake = () => {
@@ -146,7 +150,7 @@ export default function MemberPhotographPage() {
   // Show loading state while checking member
   if (!member && members) {
     return (
-      <Card className="w-full max-w-2xl shadow-lg">
+      <Card className="w-full max-w-2xl sm:max-w-4xl shadow-lg">
         <CardContent className="p-6 text-center">
           <p className="text-lg">Loading member data...</p>
         </CardContent>
@@ -156,18 +160,28 @@ export default function MemberPhotographPage() {
 
   const memberNumber = memberIndex + 1;
 
+  // Responsive class for the camera/image container
+  const containerClasses = "relative h-64 w-64 sm:h-80 sm:w-96 overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de]";
+
   return (
-    <Card className="w-full max-w-2xl shadow-lg">
+    // Applied responsive max-width to Card
+    <Card className="w-full max-w-2xl sm:max-w-4xl shadow-lg">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">
+        {/* Applied responsive title size */}
+        <CardTitle className="font-headline text-2xl sm:text-3xl">
           Member #{memberNumber} - Photograph
         </CardTitle>
-        <CardDescription>
+        {/* Applied responsive description size */}
+        <CardDescription className="text-base sm:text-lg">
           Please capture a clear photo of the team member.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col items-center justify-center space-y-4">
-        <div className="relative h-64 w-64 overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de]">
+      
+      {/* Applied responsive spacing to CardContent */}
+      <CardContent className="flex flex-col items-center justify-center space-y-4 sm:space-y-6"> 
+        
+        {/* Applied responsive size to image/video container */}
+        <div className={containerClasses}> 
           {capturedImage ? (
             <img
               src={capturedImage}
@@ -190,46 +204,59 @@ export default function MemberPhotographPage() {
           <div className="flex flex-col items-center gap-2">
             <Alert variant="destructive">
               <AlertTitle>Camera Access Required</AlertTitle>
-              <AlertDescription className={"text-[#8d7c8b]"}>
+              {/* Applied responsive text size to Alert Description */}
+              <AlertDescription className={"text-[#8d7c8b] text-base sm:text-lg"}>
                 Please allow camera access in your browser to use this feature.
               </AlertDescription>
             </Alert>
-            <CameraPermissionButton />
+            {/* CameraPermissionButton - responsive styles applied via className to the container/component itself */}
+            <CameraPermissionButton /> 
           </div>
         )}
 
         {!photoTaken ? (
+          // Applied responsive button size and custom color with hover
           <Button
-            className={"bg-[#4051b5] text-white"}
+            className={"bg-[#4051b5] text-white hover:bg-[#4051b5]/90 sm:h-12 sm:px-6 sm:text-base"} 
             onClick={handleCapture}
             disabled={!hasCameraPermission}
           >
-            <Camera className="mr-2 h-4 w-4" />
+            {/* Applied responsive icon size */}
+            <Camera className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> 
             Capture Photo
           </Button>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center text-green-600">
-              <Check className="mr-2 h-5 w-5" />
+            {/* Applied responsive text size to success message */}
+            <div className="flex items-center text-green-600 text-base sm:text-lg"> 
+              {/* Applied responsive icon size */}
+              <Check className="mr-2 h-5 w-5 sm:h-6 sm:w-6" /> 
               <p>Photo captured successfully!</p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleRetake}>
+            {/* Applied responsive button size */}
+            <Button variant="outline" size="sm" onClick={handleRetake} className="sm:h-12 sm:px-6 sm:text-base">
               Retake Photo
             </Button>
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between">
+      
+      {/* Applied responsive padding to CardFooter */}
+      <CardFooter className="flex justify-between pt-4 sm:pt-6"> 
+        {/* Back Button - Applied responsive size and updated onClick to navigate back to basic details */}
         <Button
           variant="outline"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/visitor-entry-exit/checkin/add-members/${memberIndex}/basic-details`)}
+          className="sm:h-12 sm:px-6 sm:text-base"
         >
           Back
         </Button>
+        {/* Next Button - Applied responsive size */}
         <Button
           variant={"default"}
           onClick={handleNext}
           disabled={!capturedImage}
+          className="sm:h-12 sm:px-6 sm:text-base"
         >
           Next Step
         </Button>

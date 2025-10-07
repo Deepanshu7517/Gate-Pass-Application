@@ -278,7 +278,7 @@ export default function GatePassMemberEquipmentPage() {
             Back
           </Button>
           <Button variant="default" size="default" type="submit">
-            Finish Adding Member <Check className="ml-2 h-4 w-4" />
+            Finish Adding <Check className="ml-2 h-4 w-4" />
           </Button>
         </CardFooter>
       </form>

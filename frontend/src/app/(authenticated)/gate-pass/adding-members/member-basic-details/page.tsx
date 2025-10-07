@@ -134,8 +134,10 @@ export default function GatePassMemberBasicDetailsPage() {
   // Show loading state while checking member existence
   if (!currentMember && members) {
     return (
-      <Card className="w-full max-w-2xl shadow-lg">
-        <CardContent className="p-6 text-center">
+      // Applied responsive max-width
+      <Card className="w-full max-w-2xl sm:max-w-4xl shadow-lg"> 
+        {/* Applied responsive padding */}
+        <CardContent className="p-6 sm:p-8 text-center"> 
           <p className="text-lg">Loading member data...</p>
         </CardContent>
       </Card>
@@ -145,22 +147,27 @@ export default function GatePassMemberBasicDetailsPage() {
   const memberNumber = memberIndex + 1;
 
   return (
-    <Card className="w-full max-w-2xl shadow-lg">
+    // Applied responsive max-width
+    <Card className="w-full max-w-2xl sm:max-w-4xl shadow-lg">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">
+          {/* Applied responsive title size */}
+          <CardTitle className="font-headline text-2xl sm:text-3xl"> 
             Member #{memberNumber} - Basic Details
           </CardTitle>
-          <CardDescription>
+          {/* Applied responsive description size */}
+          <CardDescription className="text-base sm:text-lg"> 
             Enter the personal information for this team member.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-6 sm:grid-cols-2">
+        {/* Applied responsive grid/gap/padding */}
+        <CardContent className="grid gap-6 sm:grid-cols-2 sm:gap-8 p-6 sm:p-8">
           {/* First Name Field */}
           <div>
             <label
               htmlFor="firstName"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              // Applied responsive label size
+              className="text-sm sm:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" 
             >
               First Name
             </label>
@@ -169,7 +176,11 @@ export default function GatePassMemberBasicDetailsPage() {
               placeholder="Jane"
               value={formData.firstName}
               onChange={(e) => handleInputChange("firstName", e.currentTarget.value)}
-              className={errors.firstName ? "border-red-500" : ""}
+              className={
+                errors.firstName
+                  ? "h-10 text-sm sm:h-12 sm:text-base border-red-500" // Applied responsive input size and error class
+                  : "h-10 text-sm sm:h-12 sm:text-base" // Applied responsive input size
+              }
             />
             {errors.firstName && (
               <p className="text-sm font-medium text-red-500 mt-1">
@@ -182,7 +193,8 @@ export default function GatePassMemberBasicDetailsPage() {
           <div>
             <label
               htmlFor="lastName"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              // Applied responsive label size
+              className="text-sm sm:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" 
             >
               Last Name
             </label>
@@ -191,7 +203,11 @@ export default function GatePassMemberBasicDetailsPage() {
               placeholder="Smith"
               value={formData.lastName}
               onChange={(e) => handleInputChange("lastName", e.currentTarget.value)}
-              className={errors.lastName ? "border-red-500" : ""}
+              className={
+                errors.lastName
+                  ? "h-10 text-sm sm:h-12 sm:text-base border-red-500" // Applied responsive input size and error class
+                  : "h-10 text-sm sm:h-12 sm:text-base" // Applied responsive input size
+              }
             />
             {errors.lastName && (
               <p className="text-sm font-medium text-red-500 mt-1">
@@ -204,7 +220,8 @@ export default function GatePassMemberBasicDetailsPage() {
           <div className="sm:col-span-2">
             <label
               htmlFor="email"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              // Applied responsive label size
+              className="text-sm sm:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" 
             >
               Email Address
             </label>
@@ -214,7 +231,11 @@ export default function GatePassMemberBasicDetailsPage() {
               placeholder="jane.smith@example.com"
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.currentTarget.value)}
-              className={errors.email ? "border-red-500" : ""}
+              className={
+                errors.email
+                  ? "h-10 text-sm sm:h-12 sm:text-base border-red-500" // Applied responsive input size and error class
+                  : "h-10 text-sm sm:h-12 sm:text-base" // Applied responsive input size
+              }
             />
             {errors.email && (
               <p className="text-sm font-medium text-red-500 mt-1">
@@ -227,7 +248,8 @@ export default function GatePassMemberBasicDetailsPage() {
           <div className="sm:col-span-2">
             <label
               htmlFor="phone"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              // Applied responsive label size
+              className="text-sm sm:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" 
             >
               Phone Number
             </label>
@@ -237,7 +259,11 @@ export default function GatePassMemberBasicDetailsPage() {
               placeholder="+1 (555) 987-6543"
               value={formData.phone}
               onChange={(e) => handleInputChange("phone", e.currentTarget.value)}
-              className={errors.phone ? "border-red-500" : ""}
+              className={
+                errors.phone
+                  ? "h-10 text-sm sm:h-12 sm:text-base border-red-500" // Applied responsive input size and error class
+                  : "h-10 text-sm sm:h-12 sm:text-base" // Applied responsive input size
+              }
             />
             {errors.phone && (
               <p className="text-sm font-medium text-red-500 mt-1">
@@ -246,15 +272,23 @@ export default function GatePassMemberBasicDetailsPage() {
             )}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
+        {/* Applied responsive padding to footer */}
+        <CardFooter className="flex justify-between pt-4 sm:pt-6">
           <Button
             type="button"
             variant="outline"
             onClick={() => navigate("/gate-pass/add-members")}
+            // Applied responsive button size
+            className="sm:h-12 sm:px-6 sm:text-base"
           >
             Back to Members
           </Button>
-          <Button type="submit" variant="default">
+          <Button 
+            type="submit" 
+            variant="default"
+            // Applied responsive button size
+            className="sm:h-12 sm:px-6 sm:text-base"
+          >
             Next Step
           </Button>
         </CardFooter>

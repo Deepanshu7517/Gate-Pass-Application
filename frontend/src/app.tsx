@@ -36,6 +36,7 @@ import MemberEquipmentPage from "./app/(authenticated)/visitor-entry-exit/checki
 import PlaceToVisitPage from "./app/(authenticated)/visitor-entry-exit/checkin/visit-area/page";
 import CheckoutPage from "./app/(authenticated)/visitor-entry-exit/checkout/page";
 import AppLayout from "./app/(authenticated)/layout";
+import GatePassPlaceToVisitPage from "./app/(authenticated)/gate-pass/visit-area/page";
 
 const routes = createBrowserRouter([
   {
@@ -255,6 +256,14 @@ const routes = createBrowserRouter([
     element: (
       <GatePassLayout>
         <GatePassNdaSigningPage />
+      </GatePassLayout>
+    ),
+  },
+  {
+    path: "/gate-pass/place-to-visit",
+    element: (
+      <GatePassLayout>
+        <GatePassPlaceToVisitPage />
       </GatePassLayout>
     ),
   },

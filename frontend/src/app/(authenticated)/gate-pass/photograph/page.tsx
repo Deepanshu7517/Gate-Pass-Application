@@ -17,7 +17,7 @@ import {
   AlertTitle,
 } from "../../../../components/ui/alert";
 import { useNavigate } from "react-router-dom";
-import CameraPermissionButton from "../../../../components/ui/cameraPermission";
+// Note: CameraPermissionButton is replaced by inline Button for clarity and UI consistency
 
 export default function GatePassPhotographPage() {
   const navigate = useNavigate();
@@ -30,9 +30,15 @@ export default function GatePassPhotographPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Get camera permission and start video stream
+  // LOGIC: Get camera permission and start video stream
   const getCameraPermission = async () => {
     try {
+      // Clean up previous stream if it exists (robust cleanup)
+      if (videoRef.current && videoRef.current.srcObject) {
+        (videoRef.current.srcObject as MediaStream).getTracks().forEach((track) => track.stop());
+        videoRef.current.srcObject = null;
+      }
+      
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       setHasCameraPermission(true);
 
@@ -42,18 +48,22 @@ export default function GatePassPhotographPage() {
     } catch (error) {
       console.error("Error accessing camera:", error);
       setHasCameraPermission(false);
-      toast({
-        variant: "destructive",
-        title: "Camera Access Denied",
-        description:
-          "Please enable camera permissions in your browser settings to continue.",
-      });
+      
+      // Prevent double-toasting if the error is just due to initial denial
+      if (!(error instanceof DOMException && error.name === "NotAllowedError")) {
+        toast({
+          variant: "destructive",
+          title: "Camera Access Denied",
+          description: "Please enable camera permissions in your browser settings to continue.",
+        });
+      }
     }
   };
 
+  // EFFECT: Request camera on mount/sync and clean up stream on unmount
   useEffect(() => {
-    // Only request camera if no photo has been taken yet
-    if (!checkinState.photograph) {
+    // Only request camera if no photo has been taken yet and permission state is unknown
+    if (!checkinState.photograph && hasCameraPermission === null) {
       getCameraPermission();
     }
 
@@ -64,7 +74,7 @@ export default function GatePassPhotographPage() {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [checkinState.photograph]);
 
   const handleCapture = () => {
     if (videoRef.current && canvasRef.current) {
@@ -99,6 +109,7 @@ export default function GatePassPhotographPage() {
     // Clear the photo from Redux store
     updatePhotograph(null);
     setPhotoTaken(false);
+    setHasCameraPermission(null); // Reset state to trigger new permission request
     
     // Restart camera
     getCameraPermission();
@@ -115,28 +126,41 @@ export default function GatePassPhotographPage() {
     }
     
     console.log("Current check-in state:", checkinState);
+    // Navigating to the route requested in the first component's logic
     navigate("/gate-pass/identity-proof");
   };
 
+  // Responsive class for the camera/image container
+  const containerClasses = "relative h-64 w-64 sm:h-80 sm:w-96 overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de] sm:border-gray-300";
+
+
   return (
-    <Card className="w-full max-w-2xl shadow-lg">
+    <Card className="w-full max-w-2xl sm:max-w-4xl shadow-lg">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">
+        {/* CardTitle scaling: text-2xl (mobile) -> text-3xl (PC) */}
+        <CardTitle className="font-headline text-2xl sm:text-3xl">
           Visitor Photograph
         </CardTitle>
-        <CardDescription>
+        {/* CardDescription scaling: Default (mobile) -> text-lg (PC) */}
+        <CardDescription className="text-base sm:text-lg">
           Please capture a clear photograph of the visitor.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col items-center justify-center space-y-4">
-        <div className="relative h-64 w-64 overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de]">
+      
+      {/* CardContent spacing: space-y-4 (mobile) -> space-y-6 (PC) */}
+      <CardContent className="flex flex-col items-center justify-center space-y-4 sm:space-y-4">
+        
+        {/* --- CAMERA/IMAGE VIEWER --- */}
+        <div className={containerClasses}>
           {checkinState.photograph ? (
+            // Photo Taken State
             <img
-              src={checkinState.photograph}
+              src={checkinState.photograph!} // Uses non-null assertion as logic ensures it exists here
               alt="Visitor photograph"
               className="h-full w-full object-cover"
             />
           ) : (
+            // Live Camera/Video Stream State
             <video
               ref={videoRef}
               className="h-full w-full object-cover"
@@ -148,36 +172,53 @@ export default function GatePassPhotographPage() {
           <canvas ref={canvasRef} className="hidden" />
         </div>
         
+        {/* --- PERMISSION DENIED STATE --- */}
         {hasCameraPermission === false && (
           <div className="flex flex-col items-center gap-2">
             <Alert variant="destructive">
               <AlertTitle>Camera Access Required</AlertTitle>
-              <AlertDescription className={"text-[#8d7c8b]"}>
+              {/* AlertDescription scaling: text-base (mobile) -> text-lg (PC) */}
+              <AlertDescription className={"text-[#8d7c8b] text-base sm:text-lg"}>
                 Please allow camera access in your browser to use this feature.
               </AlertDescription>
             </Alert>
-            <CameraPermissionButton />
+            {/* Camera Permission Button (Responsive size) */}
+            <Button 
+                size="default" 
+                onClick={getCameraPermission} 
+                className="sm:h-12 sm:px-6 sm:text-base"
+            >
+                <Camera className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                Request Camera Permission
+            </Button>
           </div>
         )}
 
+        {/* --- CAPTURE / RETAKE BUTTONS --- */}
         {!photoTaken ? (
+          // Capture Button (Responsive size and custom color)
           <Button
-            className={"bg-[#4051b5] text-white"}
+            size="default"
             onClick={handleCapture}
             disabled={!hasCameraPermission}
+            className="bg-[#4051b5] text-white hover:bg-[#4051b5]/90 sm:h-12 sm:px-6 sm:text-base"
           >
-            <Camera className="mr-2 h-4 w-4" />
+            <Camera className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
             Capture Photo
           </Button>
         ) : (
+          // Retake Button & Success Message
           <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center text-green-600">
-              <Check className="mr-2 h-5 w-5" />
+            {/* Success message scaling: text-base (mobile) -> text-lg (PC) */}
+            <div className="flex items-center text-green-600 text-base sm:text-lg">
+              <Check className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
               <p>Photo captured successfully!</p>
             </div>
+            {/* Retake Button (Responsive size) */}
             <Button
               variant="outline"
               size="sm"
+              className="sm:h-12 sm:px-6 sm:text-base"
               onClick={handleRetake}
             >
               Retake Photo
@@ -185,12 +226,28 @@ export default function GatePassPhotographPage() {
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={() => navigate(-1)}>
-          Back
+      
+      {/* CardFooter padding: pt-4 (mobile) -> pt-6 (PC) */}
+      <CardFooter className="flex justify-between pt-4 sm:pt-6">
+        {/* Back Button (Responsive size) */}
+        <Button 
+            variant="outline" 
+            size="default" 
+            className="sm:h-12 sm:px-6 sm:text-base"
+            onClick={() => navigate(-1)}
+        >
+            Back
         </Button>
-        <Button variant={"default"} onClick={handleNext} disabled={!photoTaken}>
-          Next
+        
+        {/* Next Button (Responsive size) */}
+        <Button 
+            variant={"default"} 
+            size="default" 
+            className="sm:h-12 sm:px-6 sm:text-base"
+            onClick={handleNext} 
+            disabled={!photoTaken}
+        >
+            Next
         </Button>
       </CardFooter>
     </Card>

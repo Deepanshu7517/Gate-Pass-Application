@@ -47,8 +47,8 @@ export default function PrintBadgePage() {
         photograph: null,
         identityProof: null,
         equipment: {
-          electrical: [{ name: "", quantity: 1 }],
-          mechanical: [{ name: "", quantity: 1 }],
+          electrical: [],
+          mechanical: [],
         },
         nda: {
           signature: "",

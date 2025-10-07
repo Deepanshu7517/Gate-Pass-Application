@@ -4,6 +4,7 @@ import {
   updateState,
   updateBasicDetails,
   updateCompanyDetails,
+  updateHost,
   updatePhotograph,
   updateIdentityProof,
   updateEquipment,
@@ -11,12 +12,16 @@ import {
   updatePlaceToVisit,
   addNewMember,
   updateMember,
+  updateMemberBasicDetails,
+  updateMemberPhotograph,
+  updateMemberIdentityProof,
+  updateMemberEquipment,
   removeMember,
   setCurrentMemberIndex,
   resetCheckinState,
   setCheckinId,
 } from '../store/slices/checkinSlice';
-import type { CheckinState, Member } from '../types';
+import type { CheckinState, Member, IdentityProof } from '../types';
 
 export const useCheckin = () => {
   const checkinState = useAppSelector((state) => state.checkin);
@@ -38,18 +43,16 @@ export const useCheckin = () => {
   // Reset state
   const handleResetCheckinState = useCallback(() => {
     dispatch(resetCheckinState());
-    // Clear localStorage if needed (already handled in store subscription)
   }, [dispatch]);
 
   // Add new member and return its index
   const handleAddNewMember = useCallback(() => {
     dispatch(addNewMember());
-    // Return the new member index (will be the last index)
     const newIndex = checkinState.members ? checkinState.members.length : 0;
     return newIndex;
   }, [dispatch, checkinState.members]);
 
-  // Additional helper methods
+  // Main visitor details helpers
   const updateBasicDetailsHelper = useCallback(
     (details: Partial<CheckinState['basicDetails']>) => {
       dispatch(updateBasicDetails(details));
@@ -64,6 +67,13 @@ export const useCheckin = () => {
     [dispatch]
   );
 
+  const updateHostHelper = useCallback(
+    (host: Partial<CheckinState['companyDetails']['host']>) => {
+      dispatch(updateHost(host));
+    },
+    [dispatch]
+  );
+
   const updatePhotographHelper = useCallback(
     (photo: string | null) => {
       dispatch(updatePhotograph(photo));
@@ -72,7 +82,7 @@ export const useCheckin = () => {
   );
 
   const updateIdentityProofHelper = useCallback(
-    (proof: string | null) => {
+    (proof: IdentityProof | null) => {
       dispatch(updateIdentityProof(proof));
     },
     [dispatch]
@@ -99,9 +109,38 @@ export const useCheckin = () => {
     [dispatch]
   );
 
+  // Member management helpers
   const updateMemberHelper = useCallback(
     (index: number, member: Partial<Member>) => {
       dispatch(updateMember({ index, member }));
+    },
+    [dispatch]
+  );
+
+  const updateMemberBasicDetailsHelper = useCallback(
+    (index: number, details: Partial<Member['basicDetails']>) => {
+      dispatch(updateMemberBasicDetails({ index, details }));
+    },
+    [dispatch]
+  );
+
+  const updateMemberPhotographHelper = useCallback(
+    (index: number, photograph: string | null) => {
+      dispatch(updateMemberPhotograph({ index, photograph }));
+    },
+    [dispatch]
+  );
+
+  const updateMemberIdentityProofHelper = useCallback(
+    (index: number, identityProof: IdentityProof | null) => {
+      dispatch(updateMemberIdentityProof({ index, identityProof }));
+    },
+    [dispatch]
+  );
+
+  const updateMemberEquipmentHelper = useCallback(
+    (index: number, equipment: Member['equipment']) => {
+      dispatch(updateMemberEquipment({ index, equipment }));
     },
     [dispatch]
   );
@@ -130,23 +169,33 @@ export const useCheckin = () => {
   return {
     // State
     checkinState,
-    isLoading: false, // Redux doesn't need loading state for hydration
-    // Main state setters (matching original Context API)
+    isLoading: false,
+
+    // Main state setters
     setCheckinState,
     resetCheckinState: handleResetCheckinState,
     addNewMember: handleAddNewMember,
 
-    // Additional helper methods for granular updates
+    // Main visitor update methods
     updateBasicDetails: updateBasicDetailsHelper,
     updateCompanyDetails: updateCompanyDetailsHelper,
+    updateHost: updateHostHelper,
     updatePhotograph: updatePhotographHelper,
     updateIdentityProof: updateIdentityProofHelper,
     updateEquipment: updateEquipmentHelper,
     updateNda: updateNdaHelper,
     updatePlaceToVisit: updatePlaceToVisitHelper,
+
+    // Member management methods
     updateMember: updateMemberHelper,
+    updateMemberBasicDetails: updateMemberBasicDetailsHelper,
+    updateMemberPhotograph: updateMemberPhotographHelper,
+    updateMemberIdentityProof: updateMemberIdentityProofHelper,
+    updateMemberEquipment: updateMemberEquipmentHelper,
     removeMember: removeMemberHelper,
     setCurrentMemberIndex: setCurrentMemberIndexHelper,
+
+    // Checkin ID
     setCheckinId: setCheckinIdHelper,
   };
 };

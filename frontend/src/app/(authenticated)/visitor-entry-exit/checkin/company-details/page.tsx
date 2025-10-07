@@ -35,14 +35,17 @@ export const employees = [
 type FormData = {
   companyName: string;
   address: string;
-  hostName: string;
+  host: {
+    name: string;
+    post: string;
+  };
   purposeOfVisit: string;
 };
 
 type FormErrors = {
   companyName?: string;
   address?: string;
-  hostName?: string;
+  host?: string;
   purposeOfVisit?: string;
 };
 
@@ -74,9 +77,15 @@ export default function CompanyDetailsPage() {
   const { checkinState, updateCompanyDetails } = useCheckin();
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState<FormData>(
-    checkinState.companyDetails
-  );
+  const [formData, setFormData] = useState<FormData>({
+    companyName: checkinState.companyDetails.companyName || "",
+    address: checkinState.companyDetails.address || "",
+    host: {
+      name: checkinState.companyDetails.host?.name || "",
+      post: checkinState.companyDetails.host?.post || "",
+    },
+    purposeOfVisit: checkinState.companyDetails.purposeOfVisit || "",
+  });
   const [errors, setErrors] = useState<FormErrors>({});
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -99,7 +108,8 @@ export default function CompanyDetailsPage() {
       newErrors.companyName = "Company name is required";
     if (!formData.address.trim())
       newErrors.address = "Company address is required";
-    if (!formData.hostName.trim()) newErrors.hostName = "Host name is required";
+    if (!formData.host.name.trim()) 
+      newErrors.host = "Host name is required";
     if (!formData.purposeOfVisit.trim())
       newErrors.purposeOfVisit = "Purpose of visit is required";
 
@@ -112,6 +122,21 @@ export default function CompanyDetailsPage() {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
+  };
+
+  const handleHostSelect = (employee: typeof employees[0]) => {
+    setFormData((prev) => ({
+      ...prev,
+      host: {
+        name: employee.name,
+        post: employee.post,
+      },
+    }));
+    if (errors.host) {
+      setErrors((prev) => ({ ...prev, host: undefined }));
+    }
+    setOpen(false);
+    setSearch("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -132,7 +157,7 @@ export default function CompanyDetailsPage() {
       ? "h-10 text-sm sm:h-12 sm:text-base border-red-500"
       : "h-10 text-sm sm:h-12 sm:text-base";
 
-  // ✅ Host name filtering
+  // Host name filtering
   const filteredEmployees = useMemo(() => {
     return employees.filter((emp) =>
       `${emp.name} ${emp.post}`.toLowerCase().includes(search.toLowerCase())
@@ -185,7 +210,7 @@ export default function CompanyDetailsPage() {
             {errors.address && <FormMessage>{errors.address}</FormMessage>}
           </FormItem>
 
-          {/* ✅ Host Name (Combobox Implementation) */}
+          {/* Host Name (Combobox Implementation) */}
           <FormItem>
             <FormLabel htmlFor="hostName">Host Name</FormLabel>
             <div ref={comboboxRef} className="relative">
@@ -194,12 +219,17 @@ export default function CompanyDetailsPage() {
                 variant="outline"
                 className={cn(
                   "w-full justify-between text-left font-normal",
-                  !formData.hostName && "text-muted-foreground",
-                  inputClassNames("hostName")
+                  !formData.host.name && "text-muted-foreground",
+                  inputClassNames("host")
                 )}
                 onClick={() => setOpen(!open)}
               >
-                {formData.hostName || "Select or search for a host..."}
+                <div className="flex flex-col items-start">
+                  <span>{formData.host.name || "Select or search for a host..."}</span>
+                  {formData.host.name && formData.host.post && (
+                    <span className="text-xs text-gray-500">{formData.host.post}</span>
+                  )}
+                </div>
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
 
@@ -218,22 +248,20 @@ export default function CompanyDetailsPage() {
                       filteredEmployees.map((emp) => (
                         <li
                           key={emp.name}
-                          onClick={() => {
-                            handleInputChange("hostName", emp.name);
-                            setOpen(false);
-                            setSearch("");
-                          }}
+                          onClick={() => handleHostSelect(emp)}
                           className={cn(
                             "flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100",
-                            formData.hostName === emp.name &&
+                            formData.host.name === emp.name &&
                               "bg-gray-100 font-medium"
                           )}
                         >
-                          <span>{emp.name}</span>
-                          <span className="text-sm text-gray-500">
-                            {emp.post}
-                          </span>
-                          {formData.hostName === emp.name && (
+                          <div className="flex flex-col">
+                            <span>{emp.name}</span>
+                            <span className="text-xs text-gray-500">
+                              {emp.post}
+                            </span>
+                          </div>
+                          {formData.host.name === emp.name && (
                             <Check className="h-4 w-4 text-green-600" />
                           )}
                         </li>
@@ -247,7 +275,7 @@ export default function CompanyDetailsPage() {
                 </div>
               )}
             </div>
-            {errors.hostName && <FormMessage>{errors.hostName}</FormMessage>}
+            {errors.host && <FormMessage>{errors.host}</FormMessage>}
           </FormItem>
 
           {/* Purpose of Visit */}

@@ -122,7 +122,7 @@ export default function PhotographPage() {
   };
 
   // Responsive class for the camera/image container
-  const containerClasses = "relative h-64 w-64 sm:h-96 sm:w-96 overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de] sm:border-gray-300";
+  const containerClasses = "relative h-64 w-64 sm:h-80 sm:w-96 overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de] sm:border-gray-300";
 
   return (
     // Card size: max-w-2xl (mobile/default) -> max-w-4xl (PC)

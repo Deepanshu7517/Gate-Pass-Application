@@ -214,7 +214,7 @@ export function IdForm() {
             value="picture"
             className="flex flex-col items-center justify-center space-y-4 mt-4"
           >
-            <div className="relative h-64 w-full md:h-96 max-w-md overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de]">
+            <div className="relative h-64 w-full md:h-80` max-w-md overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de]">
               {identityProof.type === "picture" && identityProof.data ? (
                 <img
                   src={identityProof.data}

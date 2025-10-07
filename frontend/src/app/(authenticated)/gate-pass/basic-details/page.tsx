@@ -11,7 +11,9 @@ import {
 } from "../../../../components/ui/card";
 import { Input } from "../../../../components/ui/input";
 import { useNavigate } from "react-router-dom";
+import type { ComponentChildren } from "preact";
 
+// --- Types ---
 type FormData = {
   firstName: string;
   lastName: string;
@@ -25,6 +27,33 @@ type FormErrors = {
   email?: string;
   phone?: string;
 };
+
+// --- UI Helpers (Ensuring responsiveness on Form elements) ---
+
+const FormItem: React.FC<{
+  children: ComponentChildren;
+  className?: string;
+}> = ({ children, className }) => <div className={className}>{children}</div>;
+
+// FormLabel: text-sm (mobile) -> text-base (PC)
+const FormLabel: React.FC<{ children: ComponentChildren; htmlFor: string }> = ({
+  children,
+  htmlFor,
+}) => (
+  <label
+    htmlFor={htmlFor}
+    className="text-sm sm:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  >
+    {children}
+  </label>
+);
+
+// Mimics FormMessage
+const FormMessage: React.FC<{ children: ComponentChildren }> = ({
+  children,
+}) => <p className="text-sm font-medium text-red-500 mt-1">{children}</p>;
+
+// --- Component Start ---
 
 export default function GatePassBasicDetailsPage() {
   const navigate = useNavigate();
@@ -57,7 +86,7 @@ export default function GatePassBasicDetailsPage() {
     // Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
-    } else if (formData.phone.replace(/\D/g, '').length < 10) {
+    } else if (formData.phone.replace(/\D/g, "").length < 10) {
       newErrors.phone = "Phone number must be at least 10 digits";
     }
 
@@ -66,17 +95,17 @@ export default function GatePassBasicDetailsPage() {
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
       // Update Redux store with the form data
       updateBasicDetails(formData);
@@ -87,85 +116,103 @@ export default function GatePassBasicDetailsPage() {
   };
 
   return (
-    <Card className="w-full max-w-2xl shadow-lg">
+    <Card className="w-full max-w-2xl sm:max-w-4xl shadow-lg">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">
+          {/* CardTitle scaling: text-2xl (mobile) -> text-3xl (PC) */}
+          <CardTitle className="font-headline text-2xl sm:text-3xl">
             Visitor Basic Details
           </CardTitle>
-          <CardDescription>
+          {/* CardDescription scaling: Default (mobile) -> text-lg (PC) */}
+          <CardDescription className="text-base sm:text-lg">
             Please enter the visitor's personal information.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <label htmlFor="firstName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              First Name
-            </label>
+        <CardContent className="grid gap-6 sm:grid-cols-2 sm:gap-8 p-6 sm:p-8">
+          <FormItem>
+            <FormLabel htmlFor="firstName">First Name</FormLabel>
+            {/* Input size scaling: h-10 text-sm (mobile) -> h-12 text-base (PC) */}
             <Input
               id="firstName"
               placeholder="John"
               value={formData.firstName}
-              onChange={(e) => handleInputChange('firstName', e.currentTarget.value)}
-              className={errors.firstName ? "border-red-500" : ""}
+              onChange={(e) =>
+                handleInputChange("firstName", e.currentTarget.value)
+              }
+              className={
+                errors.firstName
+                  ? "h-10 text-sm sm:h-12 sm:text-base border-red-500"
+                  : "h-10 text-sm sm:h-12 sm:text-base"
+              }
             />
-            {errors.firstName && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.firstName}</p>
-            )}
-          </div>
-          
-          <div>
-            <label htmlFor="lastName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Last Name
-            </label>
+            {errors.firstName && <FormMessage>{errors.firstName}</FormMessage>}
+          </FormItem>
+
+          <FormItem>
+            <FormLabel htmlFor="lastName">Last Name</FormLabel>
             <Input
               id="lastName"
               placeholder="Doe"
               value={formData.lastName}
-              onChange={(e) => handleInputChange('lastName', e.currentTarget.value)}
-              className={errors.lastName ? "border-red-500" : ""}
+              onChange={(e) =>
+                handleInputChange("lastName", e.currentTarget.value)
+              }
+              className={
+                errors.lastName
+                  ? "h-10 text-sm sm:h-12 sm:text-base border-red-500"
+                  : "h-10 text-sm sm:h-12 sm:text-base"
+              }
             />
-            {errors.lastName && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.lastName}</p>
-            )}
-          </div>
-          
-          <div className="sm:col-span-2">
-            <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Email Address
-            </label>
+            {errors.lastName && <FormMessage>{errors.lastName}</FormMessage>}
+          </FormItem>
+
+          <FormItem className="sm:col-span-2">
+            <FormLabel htmlFor="email">Email Address</FormLabel>
             <Input
               id="email"
               type="email"
               placeholder="john.doe@example.com"
               value={formData.email}
-              onChange={(e) => handleInputChange('email', e.currentTarget.value)}
-              className={errors.email ? "border-red-500" : ""}
+              onChange={(e) =>
+                handleInputChange("email", e.currentTarget.value)
+              }
+              className={
+                errors.email
+                  ? "h-10 text-sm sm:h-12 sm:text-base border-red-500"
+                  : "h-10 text-sm sm:h-12 sm:text-base"
+              }
             />
-            {errors.email && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.email}</p>
-            )}
-          </div>
-          
-          <div className="sm:col-span-2">
-            <label htmlFor="phone" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Phone Number
-            </label>
+            {errors.email && <FormMessage>{errors.email}</FormMessage>}
+          </FormItem>
+
+          <FormItem className="sm:col-span-2">
+            <FormLabel htmlFor="phone">Phone Number</FormLabel>
             <Input
               id="phone"
               type="tel"
               placeholder="(123) 456-7890"
               value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.currentTarget.value)}
-              className={errors.phone ? "border-red-500" : ""}
+              onChange={(e) =>
+                handleInputChange("phone", e.currentTarget.value)
+              }
+              className={
+                errors.phone
+                  ? "h-10 text-sm sm:h-12 sm:text-base border-red-500"
+                  : "h-10 text-sm sm:h-12 sm:text-base"
+              }
             />
-            {errors.phone && (
-              <p className="text-sm font-medium text-red-500 mt-1">{errors.phone}</p>
-            )}
-          </div>
+            {errors.phone && <FormMessage>{errors.phone}</FormMessage>}
+          </FormItem>
         </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button size="default" variant="default" type="submit">
+
+        {/* CardFooter padding: pt-4 (mobile) -> pt-6 (PC) */}
+        <CardFooter className="flex justify-end pt-4 sm:pt-6">
+          {/* Button size scaling: size="default" (mobile) -> sm:h-12 sm:px-6 sm:text-base (PC) */}
+          <Button
+            type="submit"
+            size="default"
+            className="sm:h-12 sm:px-6 sm:text-base" // Applying explicit PC styles
+          >
             Next
           </Button>
         </CardFooter>

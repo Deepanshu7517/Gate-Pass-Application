@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 
-export default function CameraPermissionButton() {
+export default function CameraPermissionButton({classes}:{classes?:string}) {
   const [status, setStatus] = useState("idle");
 
   const requestCamera = async () => {
@@ -19,7 +19,7 @@ export default function CameraPermissionButton() {
   return (
     <button
       onClick={requestCamera}
-      className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow"
+      className={`${"px-4 py-2 bg-blue-600 text-white rounded-lg shadow"} ${classes || ""}`}
     >
       {status === "idle" && "Request Camera Permission"}
       {status === "requesting" && "Requesting..."}

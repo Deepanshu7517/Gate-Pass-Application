@@ -16,38 +16,65 @@ import {
 } from "../../../../../components/ui/alert";
 import { Camera, Check } from "lucide-preact";
 import { useToast } from "../../../../../hooks/use-toast";
-import { useNavigate, useParams } from "react-router-dom";
-import CameraPermissionButton from "../../../../../components/ui/cameraPermission";
+import { useNavigate } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../../components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../../../components/ui/tabs";
+import { Label } from "../../../../../components/ui/label";
+import { Input } from "../../../../../components/ui/input";
+import type { IdentityProof } from "../../../../../types";
 
 export function GatePassMemberIdForm() {
-  const { index } = useParams<{ index: string }>();
-  const memberIndex = Number(index);
-
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { checkinState, updateMember } = useCheckin();
+  const { toast } = useToast();
 
-  const { currentMemberIndex, members } = checkinState;
-  const member = currentMemberIndex !== null && members ? members[currentMemberIndex] : null;
+  // Get the current member
+  const currentMemberIndex = checkinState.currentMemberIndex;
+  const currentMember =
+    currentMemberIndex !== null && checkinState.members
+      ? checkinState.members[currentMemberIndex]
+      : null;
 
-  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-  const [capturedImage, setCapturedImage] = useState<string | null>(member?.identityProof || null);
-  const [photoTaken, setPhotoTaken] = useState(!!member?.identityProof);
+  // Handle case when there's no current member
+  useEffect(() => {
+    if (currentMember === null) {
+      toast({
+        variant: "destructive",
+        title: "No Member Selected",
+        description: "Please select a member first.",
+      });
+      navigate(-1);
+    }
+  }, [currentMember, navigate, toast]);
+
+  // Initialize local state from current member's identity proof
+  const initialProof = currentMember?.identityProof || {
+    type: "picture",
+    data: null,
+  };
+  const [identityProof, setIdentityProof] =
+    useState<IdentityProof>(initialProof);
+
+  const [hasCameraPermission, setHasCameraPermission] = useState<
+    boolean | null
+  >(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Check if member exists and redirect if not
-  useEffect(() => {
-    if (!member && members) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No member selected. Redirecting...",
-      });
-      navigate("/gate-pass/add-members");
-    }
-  }, [member, members, navigate, toast]);
+  const isPictureTab = identityProof.type === "picture";
+  const photoTaken = isPictureTab && identityProof.data !== null;
 
   const getCameraPermission = async () => {
     try {
@@ -72,23 +99,19 @@ export function GatePassMemberIdForm() {
   };
 
   useEffect(() => {
-    // Only request camera if no photo has been taken yet
-    if (!photoTaken) {
+    if (isPictureTab && !photoTaken) {
       getCameraPermission();
     }
 
-    // Cleanup: Stop video stream when component unmounts
     return () => {
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [photoTaken]);
+  }, [isPictureTab, photoTaken]);
 
   const handleCapture = async () => {
-    if (currentMemberIndex === null) return;
-
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -99,146 +122,225 @@ export function GatePassMemberIdForm() {
 
       const dataUri = canvas.toDataURL("image/jpeg");
 
-      // Stop video stream after capturing
       if (video.srcObject) {
         const stream = video.srcObject as MediaStream;
         stream.getTracks().forEach((track) => track.stop());
       }
 
-      // Update local state
-      setCapturedImage(dataUri);
-      setPhotoTaken(true);
-
-      // Update Redux store
-      updateMember(currentMemberIndex, { identityProof: dataUri });
+      setIdentityProof({ type: "picture", data: dataUri });
 
       toast({
-        title: "ID Proof Captured!",
-        description: `ID for ${member?.basicDetails.firstName || "member"} has been saved.`,
+        title: "Success",
+        description: "ID Photo Captured.",
       });
     }
   };
 
   const handleRetake = () => {
-    if (currentMemberIndex === null) return;
+    setIdentityProof({ type: "picture", data: null });
+  };
 
-    // Clear identity proof from Redux store
-    updateMember(currentMemberIndex, { identityProof: null });
-    setCapturedImage(null);
-    setPhotoTaken(false);
-
-    // Restart camera
-    getCameraPermission();
+  const isNextDisabled = () => {
+    if (identityProof.type === "picture") {
+      return identityProof.data === null;
+    }
+    if (identityProof.type === "number") {
+      return !identityProof.idType || identityProof.idNumber.trim() === "";
+    }
+    return true;
   };
 
   const handleNext = () => {
-    if (!capturedImage) {
+    if (isNextDisabled()) {
       toast({
         variant: "destructive",
-        title: "No ID Proof Captured",
-        description: "Please capture an image of the ID before proceeding.",
+        title: "Required Information Missing",
+        description:
+          "Please complete the identity proof details before proceeding.",
       });
       return;
     }
 
-    console.log("Current state:", checkinState);
-    navigate(`/gate-pass/add-members/${memberIndex}/equipment`);
+    // Update the current member's identity proof
+    if (currentMemberIndex !== null) {
+      updateMember(currentMemberIndex, {
+        identityProof: identityProof,
+      });
+
+      console.log("Updated member at index:", currentMemberIndex);
+      console.log("Current check-in state:", checkinState);
+      
+      // Navigate to the next step (adjust the path as needed)
+      navigate(`/gate-pass/add-members/${currentMemberIndex}/equipment`);
+    }
   };
 
-  // Show loading state while checking member
-  if (!member && members) {
-    return (
-      <Card className="w-full max-w-2xl shadow-lg">
-        <CardContent className="p-6 text-center">
-          <p className="text-lg">Loading member data...</p>
-        </CardContent>
-      </Card>
-    );
+  const isIdentityProofNumber = identityProof.type === "number";
+
+  // Early return if no current member
+  if (!currentMember) {
+    return null;
   }
 
-  const memberNumber = memberIndex + 1;
-
   return (
-    <Card className="w-full max-w-2xl shadow-lg">
+    <Card className="w-full max-w-2xl sm:max-w-4xl shadow-lg">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">
-          Member #{memberNumber} - Identity Proof
+        <CardTitle className="font-headline text-2xl sm:text-3xl">
+          Member Identity Proof
         </CardTitle>
-        <CardDescription>
-          Capture a clear image of the member's ID proof.
+        <CardDescription className="text-base sm:text-lg">
+          Capture a clear photograph of {currentMember.basicDetails.firstName}'s ID card or enter the ID number.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col items-center justify-center space-y-4">
-        <div className="relative h-64 w-full max-w-md overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de]">
-          {capturedImage ? (
-            <img
-              src={capturedImage}
-              alt="ID card preview"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <video
-              ref={videoRef}
-              className="h-full w-full object-cover"
-              autoPlay
-              muted
-              playsInline
-            />
-          )}
-          <canvas ref={canvasRef} className="hidden" />
-        </div>
+      <CardContent className="flex flex-col items-center justify-center space-y-4 sm:space-y-6">
+        <Tabs
+          defaultValue={identityProof.type === "picture" ? "picture" : "number"}
+          className="w-full"
+          onValueChange={(value) => {
+            if (videoRef.current && videoRef.current.srcObject) {
+              (videoRef.current.srcObject as MediaStream)
+                .getTracks()
+                .forEach((track) => track.stop());
+            }
 
-        {hasCameraPermission === false && (
-          <div className="flex flex-col items-center gap-2">
-            <Alert variant="destructive">
-              <AlertTitle>Camera Access Required</AlertTitle>
-              <AlertDescription className={"text-[#8d7c8b]"}>
-                Please allow camera access in your browser to use this feature.
-              </AlertDescription>
-            </Alert>
-            <CameraPermissionButton />
-          </div>
-        )}
+            if (value === "picture") {
+              const existingData =
+                currentMember.identityProof?.type === "picture"
+                  ? currentMember.identityProof.data
+                  : null;
+              setIdentityProof({ type: "picture", data: existingData });
+            } else {
+              const existingDetails =
+                currentMember.identityProof?.type === "number"
+                  ? currentMember.identityProof
+                  : { idType: "", idNumber: "" };
+              setIdentityProof({ type: "number", ...existingDetails } as any);
+            }
+          }}
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="picture">Capture Photo</TabsTrigger>
+            <TabsTrigger value="number">Enter ID Number</TabsTrigger>
+          </TabsList>
 
-        <div className="flex flex-col items-center gap-2">
-          <Button
-            className={"bg-[#4051b5] text-white"}
-            onClick={handleCapture}
-            disabled={photoTaken || !hasCameraPermission}
+          <TabsContent
+            value="picture"
+            className="flex flex-col items-center justify-center space-y-4 mt-4"
           >
-            {photoTaken ? (
-              <>
-                <Check className="mr-2 h-4 w-4" />
-                ID Captured
-              </>
-            ) : (
-              <>
-                <Camera className="mr-2 h-4 w-4" />
-                Capture ID Photo
-              </>
-            )}
-          </Button>
+            <div className="relative h-64 w-full md:h-80 max-w-md overflow-hidden rounded-lg border-2 border-dashed border-[#d4d7de]">
+              {identityProof.type === "picture" && identityProof.data ? (
+                <img
+                  src={identityProof.data}
+                  alt="ID card preview"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  className="h-full w-full object-cover"
+                  autoPlay
+                  muted
+                  playsInline
+                />
+              )}
+              <canvas ref={canvasRef} className="hidden" />
+            </div>
 
-          {photoTaken && (
-            <Button variant="outline" size="sm" onClick={handleRetake}>
-              Retake Photo
-            </Button>
-          )}
-        </div>
+            {hasCameraPermission === false &&
+              identityProof.type === "picture" && (
+                <Alert variant="destructive">
+                  <AlertTitle>Camera Access Required</AlertTitle>
+                  <AlertDescription className="text-[#8d7c8b]">
+                    Please allow camera access in your browser to use this
+                    feature.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+            <div className="flex flex-col items-center gap-2">
+              {identityProof.type === "picture" && identityProof.data ? (
+                <Button variant="outline" size="sm" onClick={handleRetake}>
+                  Retake Photo
+                </Button>
+              ) : (
+                <Button
+                  className="bg-[#4051b5] text-white"
+                  onClick={handleCapture}
+                  disabled={!hasCameraPermission}
+                >
+                  <Camera className="mr-2 h-4 w-4" />
+                  Capture ID Photo
+                </Button>
+              )}
+              {identityProof.type === "picture" && identityProof.data && (
+                <div className="flex items-center text-sm font-medium text-[#4051b5]">
+                  <Check className="mr-2 h-4 w-4" /> ID Captured
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="number" className="space-y-4 mt-6">
+            {isIdentityProofNumber && (
+              <div className="grid w-full max-w-md items-center gap-4 mx-auto">
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="id-type">ID Type</Label>
+                  <Select
+                    value={identityProof.idType}
+                    onValueChange={(value) => {
+                      setIdentityProof({
+                        ...identityProof,
+                        idType: value as IdentityProof extends {
+                          type: "number";
+                        }
+                          ? IdentityProof["idType"]
+                          : never,
+                      });
+                    }}
+                  >
+                    <SelectTrigger id="id-type">
+                      <SelectValue placeholder="Select ID type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aadhaar-card">Aadhaar Card</SelectItem>
+                      <SelectItem value="pan-card">PAN Card</SelectItem>
+                      <SelectItem value="visa">Visa</SelectItem>
+                      <SelectItem value="driving-license">
+                        Driving License
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="id-number">ID Number</Label>
+                  <Input
+                    id="id-number"
+                    placeholder="Enter the ID number"
+                    value={identityProof.idNumber}
+                    onChange={(e) =>
+                      isIdentityProofNumber &&
+                      setIdentityProof({
+                        ...identityProof,
+                        idNumber: e.currentTarget.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={() => navigate(`/gate-pass/add-members/${memberIndex}/photograph`)}
-        >
+        <Button variant="outline" onClick={() => navigate(-1)}>
           Back
         </Button>
         <Button
-          variant={"default"}
+          variant="default"
           onClick={handleNext}
-          disabled={!capturedImage}
+          disabled={isNextDisabled()}
         >
-          Next Step
+          Next
         </Button>
       </CardFooter>
     </Card>

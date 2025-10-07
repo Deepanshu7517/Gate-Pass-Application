@@ -83,7 +83,8 @@ export default function GatePassEquipmentPage() {
     updateEquipment(cleanedData);
     
     console.log("Current check-in state:", checkinState);
-    navigate("/gate-pass/add-members");
+    // Use the required route
+    navigate("/gate-pass/add-members"); 
   };
 
   const renderEquipmentSection = (
@@ -94,16 +95,20 @@ export default function GatePassEquipmentPage() {
     const equipment = formData[type];
 
     return (
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">{title}</h3>
+      // Responsive spacing inside the section
+      <div className="space-y-4 sm:space-y-6"> 
+        {/* Responsive title size */}
+        <h3 className="text-lg sm:text-xl font-semibold">{title}</h3> 
         {equipment.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">No equipment added yet</p>
+          <p className="text-sm sm:text-base text-gray-500 italic">No equipment added yet</p>
         ) : (
           equipment.map((item, index) => (
-            <div key={index} className="flex items-end gap-2">
+            // Responsive gap between items
+            <div key={index} className="flex items-end gap-2 sm:gap-4"> 
               <div className="flex-1">
+                {/* Responsive label size */}
                 {index === 0 && (
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  <label className="text-sm sm:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     Device Name
                   </label>
                 )}
@@ -119,22 +124,26 @@ export default function GatePassEquipmentPage() {
                       e.currentTarget.value
                     )
                   }
+                  // Responsive Input height and text size
+                  className="h-10 text-sm sm:h-12 sm:text-base"
                 />
               </div>
 
               <div>
+                 {/* Responsive label size */}
                 {index === 0 && (
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  <label className="text-sm sm:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     Qty
                   </label>
                 )}
                 {index > 0 && <label className="sr-only">Qty</label>}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  {/* Quantity control buttons and input size scaling */}
                   <Button
                     type="button"
                     variant="destructive"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 sm:h-9 sm:w-9"
                     onClick={() =>
                       handleEquipmentChange(
                         type,
@@ -145,10 +154,10 @@ export default function GatePassEquipmentPage() {
                     }
                     disabled={item.quantity <= 1}
                   >
-                    <Minus className="h-4 w-4" />
+                    <Minus className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                   <Input
-                    className="w-12 text-center [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="w-12 text-center text-sm sm:text-base [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     min="1"
                     value={item.quantity}
@@ -166,7 +175,7 @@ export default function GatePassEquipmentPage() {
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="h-8 w-8 bg-green-500 text-white"
+                    className="h-8 w-8 sm:h-9 sm:w-9 bg-green-500 text-white hover:bg-green-600"
                     onClick={() =>
                       handleEquipmentChange(
                         type,
@@ -176,30 +185,34 @@ export default function GatePassEquipmentPage() {
                       )
                     }
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </div>
               </div>
 
+              {/* Trash button size scaling */}
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
+                className="h-10 w-10 sm:h-12 sm:w-12"
                 onClick={() => removeEquipment(type, index)}
                 title="Remove equipment"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </div>
           ))
         )}
+        {/* Add Equipment Button scaling */}
         <Button
           type="button"
           variant="outline"
           size="sm"
+          className="sm:h-10 sm:px-4 sm:text-base"
           onClick={() => addEquipment(type)}
         >
-          <PlusCircle className="mr-2 h-4 w-4" />
+          <PlusCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Add {title.slice(0, -1)} {/* Remove 's' from 'Devices' */}
         </Button>
       </div>
@@ -207,17 +220,20 @@ export default function GatePassEquipmentPage() {
   };
 
   return (
-    <Card className="w-full max-w-4xl shadow-lg">
+    <Card className="w-full max-w-4xl sm:max-w-5xl shadow-lg">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">
+          {/* CardTitle scaling: text-2xl (mobile) -> text-3xl (PC) */}
+          <CardTitle className="font-headline text-2xl sm:text-3xl">
             Equipment Details
           </CardTitle>
-          <CardDescription>
+          {/* CardDescription scaling: Default (mobile) -> text-lg (PC) */}
+          <CardDescription className="text-base sm:text-lg">
             List any equipment the visitor is bringing. Leave blank if none.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-8 md:grid-cols-2">
+        {/* CardContent: Increased gap for large screens, grid layout */}
+        <CardContent className="grid gap-8 sm:gap-12 lg:grid-cols-2">
           {renderEquipmentSection("electrical", "Electrical Devices", "Laptop")}
           {renderEquipmentSection(
             "mechanical",
@@ -225,11 +241,24 @@ export default function GatePassEquipmentPage() {
             "Toolkit"
           )}
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => navigate(-1)}>
+        {/* CardFooter padding and Button scaling */}
+        <CardFooter className="flex justify-between pt-4 sm:pt-6">
+          {/* Back Button scaling */}
+          <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)} 
+            size="default" 
+            className="sm:h-12 sm:px-6 sm:text-base"
+          >
             Back
           </Button>
-          <Button variant="default" size="default" type="submit">
+          {/* Next Button scaling */}
+          <Button 
+            variant="default" 
+            size="default" 
+            type="submit" 
+            className="sm:h-12 sm:px-6 sm:text-base"
+          >
             Next
           </Button>
         </CardFooter>

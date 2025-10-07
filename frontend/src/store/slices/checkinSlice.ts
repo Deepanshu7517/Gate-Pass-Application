@@ -11,7 +11,10 @@ const initialState: CheckinState = {
   companyDetails: {
     companyName: "",
     address: "",
-    hostName: "",
+    host: {
+      name: "",
+      post: "",
+    },
     purposeOfVisit: "",
   },
   photograph: null,
@@ -59,6 +62,17 @@ const checkinSlice = createSlice({
       state.companyDetails = { ...state.companyDetails, ...action.payload };
     },
 
+    // Update host details (new helper for nested host object)
+    updateHost: (
+      state,
+      action: PayloadAction<Partial<CheckinState["companyDetails"]["host"]>>
+    ) => {
+      state.companyDetails.host = {
+        ...state.companyDetails.host,
+        ...action.payload,
+      };
+    },
+
     // Update photograph
     updatePhotograph: (state, action: PayloadAction<string | null>) => {
       state.photograph = action.payload;
@@ -71,6 +85,7 @@ const checkinSlice = createSlice({
     ) => {
       state.identityProof = action.payload;
     },
+
     // Update equipment
     updateEquipment: (
       state,
@@ -116,6 +131,60 @@ const checkinSlice = createSlice({
       }
     },
 
+    // Update member's basic details
+    updateMemberBasicDetails: (
+      state,
+      action: PayloadAction<{
+        index: number;
+        details: Partial<Member["basicDetails"]>;
+      }>
+    ) => {
+      if (state.members && state.members[action.payload.index]) {
+        state.members[action.payload.index].basicDetails = {
+          ...state.members[action.payload.index].basicDetails,
+          ...action.payload.details,
+        };
+      }
+    },
+
+    // Update member's photograph
+    updateMemberPhotograph: (
+      state,
+      action: PayloadAction<{ index: number; photograph: string | null }>
+    ) => {
+      if (state.members && state.members[action.payload.index]) {
+        state.members[action.payload.index].photograph =
+          action.payload.photograph;
+      }
+    },
+
+    // Update member's identity proof
+    updateMemberIdentityProof: (
+      state,
+      action: PayloadAction<{
+        index: number;
+        identityProof: IdentityProof | null;
+      }>
+    ) => {
+      if (state.members && state.members[action.payload.index]) {
+        state.members[action.payload.index].identityProof =
+          action.payload.identityProof;
+      }
+    },
+
+    // Update member's equipment
+    updateMemberEquipment: (
+      state,
+      action: PayloadAction<{
+        index: number;
+        equipment: Member["equipment"];
+      }>
+    ) => {
+      if (state.members && state.members[action.payload.index]) {
+        state.members[action.payload.index].equipment = action.payload.equipment;
+      }
+    },
+
     // Remove member
     removeMember: (state, action: PayloadAction<number>) => {
       if (state.members) {
@@ -153,6 +222,7 @@ export const {
   updateState,
   updateBasicDetails,
   updateCompanyDetails,
+  updateHost,
   updatePhotograph,
   updateIdentityProof,
   updateEquipment,
@@ -160,6 +230,10 @@ export const {
   updatePlaceToVisit,
   addNewMember,
   updateMember,
+  updateMemberBasicDetails,
+  updateMemberPhotograph,
+  updateMemberIdentityProof,
+  updateMemberEquipment,
   removeMember,
   setCurrentMemberIndex,
   resetCheckinState,

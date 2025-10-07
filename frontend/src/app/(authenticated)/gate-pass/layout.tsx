@@ -18,9 +18,9 @@ const stepPaths = [
   "/gate-pass/photograph",
   "/gate-pass/identity-proof",
   "/gate-pass/equipment",
-  "/gate-pass/add-member",
-  "/gate-pass/nda-signing",
   "/gate-pass/add-members",
+  "/gate-pass/nda-signing",
+  "/gate-pass/place-to-visit",
   "/gate-pass/print-badge",
 ];
 

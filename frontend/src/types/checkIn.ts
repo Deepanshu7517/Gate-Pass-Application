@@ -51,10 +51,14 @@
 //   id: string | null;
 // };
 
-
-
-
 export type Equipment = { name: string; quantity: number };
+export type IdentityProof =
+  | { type: "picture"; data: string | null }
+  | {
+      type: "number";
+      idType: "aadhaar-card" | "pan-card" | "visa" | "driving-license" | "";
+      idNumber: string;
+    };
 export interface Member {
   basicDetails: {
     firstName: string;
@@ -63,16 +67,9 @@ export interface Member {
     phone: string;
   };
   photograph: string | null;
-  identityProof: string | null;
+  identityProof: IdentityProof | null;
   equipment: { electrical: Equipment[]; mechanical: Equipment[] };
 }
-export type IdentityProof =
-  | { type: "picture"; data: string | null }
-  | {
-      type: "number";
-      idType: "aadhaar-card" | "pan-card" | "visa" | "driving-license" | "";
-      idNumber: string;
-    };
 export type CheckinState = {
   basicDetails: {
     firstName: string;
@@ -83,7 +80,10 @@ export type CheckinState = {
   companyDetails: {
     companyName: string;
     address: string;
-    hostName: string;
+    host: {
+      name: string;
+      post: string;
+    };
     purposeOfVisit: string;
   };
   photograph: string | null;
