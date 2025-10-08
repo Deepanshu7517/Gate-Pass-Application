@@ -108,7 +108,8 @@ export default function GatePassNdaSigningPage() {
     if (
       !state.companyDetails.companyName.trim() ||
       !state.companyDetails.address.trim() ||
-      !state.companyDetails.hostName.trim() ||
+      !state.companyDetails.host.name.trim() ||
+      !state.companyDetails.host.post.trim() ||
       !state.companyDetails.purposeOfVisit.trim()
     ) {
       alert("Please complete the Company Details section first");

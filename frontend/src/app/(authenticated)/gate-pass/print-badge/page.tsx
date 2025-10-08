@@ -42,7 +42,7 @@ export default function GatePassPrintBadgePage() {
         companyDetails: {
           companyName: "",
           address: "",
-          hostName: "",
+          host: { name: "", post: "" },
           purposeOfVisit: "",
         },
         photograph: null,
@@ -160,7 +160,7 @@ export default function GatePassPrintBadgePage() {
               <div className="flex justify-between border-t pt-2 border-[#d4d7de]">
                 <span className="font-semibold">HOST:</span>
                 <span className="text-[#8d7c8b]">
-                  {state.companyDetails.hostName}
+                  {state.companyDetails.host.name}
                 </span>
               </div>
               <div className="flex justify-between border-t pt-2 mt-2 border-[#d4d7de]">

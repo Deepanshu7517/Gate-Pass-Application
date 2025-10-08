@@ -23,7 +23,6 @@ import {
 } from "../../../components/ui/table"
 import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
-import { ChevronDown } from "lucide-preact"
 import type { Visitor } from "./columns";
 
 
@@ -56,7 +55,7 @@ export function DataTable<TData extends Visitor, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
+    globalFilterFn: (row, filterValue) => {
         const name = row.getValue('name') as string;
         const id = row.getValue('id') as string;
         return name.toLowerCase().includes(filterValue.toLowerCase()) || id.toLowerCase().includes(filterValue.toLowerCase());

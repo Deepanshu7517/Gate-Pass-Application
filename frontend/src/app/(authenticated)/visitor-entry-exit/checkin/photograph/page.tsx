@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../../../components/ui/card";
-import { Camera, Check, ArrowLeft } from "lucide-preact"; // Added ArrowLeft for the Back button
+import { Camera, Check } from "lucide-preact"; // Added ArrowLeft for the Back button
 import { useToast } from "../../../../../hooks/use-toast";
 import {
   Alert,

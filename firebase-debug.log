@@ -1,0 +1,65 @@
+[debug] [2025-10-08T06:43:48.262Z] ----------------------------------------------------------------------
+[debug] [2025-10-08T06:43:48.264Z] Command:       /usr/local/bin/node /usr/local/bin/firebase init
+[debug] [2025-10-08T06:43:48.264Z] CLI Version:   14.17.0
+[debug] [2025-10-08T06:43:48.264Z] Platform:      linux
+[debug] [2025-10-08T06:43:48.264Z] Node Version:  v22.18.0
+[debug] [2025-10-08T06:43:48.264Z] Time:          Wed Oct 08 2025 12:13:48 GMT+0530 (India Standard Time)
+[debug] [2025-10-08T06:43:48.264Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-08T06:43:48.267Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-10-08T06:43:48.267Z] > authorizing via signed-in user (deepudagar90@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /home/deepanshu-dagar/next js project/Gate-Pass-Application
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-10-08T06:43:52.311Z] Using project from CLI flag: testing-gate-pass
+[debug] [2025-10-08T06:43:52.312Z] Checked if tokens are valid: false, expires at: 1759897972425
+[debug] [2025-10-08T06:43:52.312Z] Checked if tokens are valid: false, expires at: 1759897972425
+[debug] [2025-10-08T06:43:52.312Z] > refreshing access token with scopes: []
+[debug] [2025-10-08T06:43:52.313Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-08T06:43:52.313Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-08T06:43:52.592Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-08T06:43:52.592Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-08T06:43:52.596Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/testing-gate-pass [none]
+[debug] [2025-10-08T06:43:53.098Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/testing-gate-pass 200
+[debug] [2025-10-08T06:43:53.098Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/testing-gate-pass {"projectId":"testing-gate-pass","projectNumber":"673255997164","displayName":"testing-gate-pass","name":"projects/testing-gate-pass","resources":{"hostingSite":"testing-gate-pass"},"state":"ACTIVE","etag":"1_b9c5e468-9f00-4db1-b22b-212913d124c6"}
+[info] i  Using project testing-gate-pass (testing-gate-pass) 
+[info] 
+=== Hosting Setup
+[debug] [2025-10-08T06:43:53.243Z] Checked if tokens are valid: true, expires at: 1759909431592
+[debug] [2025-10-08T06:43:53.243Z] Checked if tokens are valid: true, expires at: 1759909431592
+[debug] [2025-10-08T06:43:53.243Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/testing-gate-pass [none]
+[debug] [2025-10-08T06:43:53.919Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/testing-gate-pass 200
+[debug] [2025-10-08T06:43:53.919Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/testing-gate-pass {"projectId":"testing-gate-pass","projectNumber":"673255997164","displayName":"testing-gate-pass","name":"projects/testing-gate-pass","resources":{"hostingSite":"testing-gate-pass"},"state":"ACTIVE","etag":"1_b9c5e468-9f00-4db1-b22b-212913d124c6"}
+[info] 
+[info] Your public directory is the folder (relative to your project directory) that
+[info] will contain Hosting assets to be uploaded with firebase deploy. If you
+[info] have a build process for your assets, use your build's output directory.
+[info] 
+[debug] [2025-10-08T06:44:25.559Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (/usr/local/lib/node_modules/firebase-tools/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)
+    at Interface.emit (node:events:518:28)
+    at Interface.emit (node:domain:489:12)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1132:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:271:20)
+    at ReadStream.emit (node:events:530:35)
+    at ReadStream.emit (node:domain:489:12)
+    at emitKeys (node:internal/readline/utils:370:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+[error] 
+[error] Error: An unexpected error has occurred.

@@ -6,7 +6,7 @@ import {
   CardContent,
 } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { ClipboardClock, LogIn, LogOut, QrCode } from 'lucide-preact';
+import { ClipboardClock,  QrCode } from 'lucide-preact';
 import { useNavigate } from "react-router-dom";
 import AppLayout from "../layout";
 

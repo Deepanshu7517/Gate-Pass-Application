@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../../../components/ui/table";
-import { UserPlus, UserX, User, Users } from "lucide-preact";
+import { UserPlus, User, Users } from "lucide-preact";
 import { useNavigate } from "react-router-dom";
 import { useCheckin } from "../../../../hooks/useCheckIn";
 

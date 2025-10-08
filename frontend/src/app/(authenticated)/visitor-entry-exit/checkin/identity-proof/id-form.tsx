@@ -14,7 +14,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "../../../../../components/ui/alert";
-import { Camera, Check, ArrowLeft } from "lucide-preact";
+import { Camera, Check } from "lucide-preact";
 import { useToast } from "../../../../../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import {

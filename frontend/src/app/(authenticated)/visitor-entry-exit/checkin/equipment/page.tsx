@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "../../../../../components/ui/card";
 import { Input } from "../../../../../components/ui/input";
-import { Minus, Plus, PlusCircle, Trash2, ArrowLeft } from "lucide-preact"; // Added ArrowLeft
+import { Minus, Plus, PlusCircle, Trash2 } from "lucide-preact"; // Added ArrowLeft
 import { useNavigate } from "react-router-dom";
 
 type Equipment = {

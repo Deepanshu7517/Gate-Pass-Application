@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
+    "firebase": "^12.3.0",
     "lucide-preact": "^0.544.0",
     "preact": "^10.27.2",
     "radix-ui": "^1.4.3",

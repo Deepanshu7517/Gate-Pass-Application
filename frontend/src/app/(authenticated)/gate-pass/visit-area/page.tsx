@@ -1,4 +1,4 @@
-import { Building2, Factory, ArrowLeft } from 'lucide-preact';
+import { Building2, Factory } from 'lucide-preact';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../../../components/ui/card';
 import { Button } from '../../../../components/ui/button';
 import { useNavigate } from 'react-router-dom';
