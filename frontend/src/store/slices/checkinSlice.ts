@@ -14,6 +14,7 @@ const initialState: CheckinState = {
     host: {
       name: "",
       post: "",
+      department: "",
     },
     purposeOfVisit: "",
   },
@@ -107,6 +108,7 @@ const checkinSlice = createSlice({
     // Add new member
     addNewMember: (state) => {
       const newMember: Member = {
+        id: null,
         basicDetails: { firstName: "", lastName: "", email: "", phone: "" },
         photograph: null,
         identityProof: null,

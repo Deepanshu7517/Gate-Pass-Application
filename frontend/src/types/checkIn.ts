@@ -60,6 +60,7 @@ export type IdentityProof =
       idNumber: string;
     };
 export interface Member {
+  id: string | null;
   basicDetails: {
     firstName: string;
     lastName: string;
@@ -83,6 +84,7 @@ export type CheckinState = {
     host: {
       name: string;
       post: string;
+      department: string;
     };
     purposeOfVisit: string;
   };

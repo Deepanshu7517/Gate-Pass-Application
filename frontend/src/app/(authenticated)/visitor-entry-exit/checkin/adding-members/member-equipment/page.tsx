@@ -23,7 +23,7 @@ type FormData = {
   electrical: Equipment[];
   mechanical: Equipment[];
 };
-
+const memberId = `MEM-${Date.now()}`.toUpperCase();
 export default function MemberEquipmentPage() {
   const { index } = useParams<{ index: string }>();
   const memberIndex = Number(index);
@@ -102,6 +102,7 @@ export default function MemberEquipmentPage() {
 
     // Update member in Redux store
     updateMember(currentMemberIndex, { equipment: cleanedData });
+    updateMember(currentMemberIndex, { id: memberId });
 
     // Reset currentMemberIndex to null after finishing with this member
     setCurrentMemberIndex(null);

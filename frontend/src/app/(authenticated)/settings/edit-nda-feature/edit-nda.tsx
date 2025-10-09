@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useCallback } from 'react';
 // Import Redux hooks and action
 import { useSelector, useDispatch } from 'react-redux';

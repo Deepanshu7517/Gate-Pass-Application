@@ -8,6 +8,8 @@ import {
 import { Users, ArrowRightLeft, Bell, BarChart, Settings } from "lucide-preact";
 import { Link } from "react-router-dom";
 import AppLayout from "../layout";
+import { useEffect } from "preact/hooks";
+import { fetchVisitors } from "../../../server-connection/fetchVisitors";
 
 const features = [
   {
@@ -43,6 +45,13 @@ const features = [
 ];
 
 export default function DashboardPage() {
+  useEffect(() => {
+    const loadVisitors = async () => {
+      const visitors = await fetchVisitors();
+      console.log("Visitors from backend:", visitors);
+    };
+    loadVisitors();
+  }, []);
   return (
     <AppLayout>
       <div className="flex flex-col h-full">

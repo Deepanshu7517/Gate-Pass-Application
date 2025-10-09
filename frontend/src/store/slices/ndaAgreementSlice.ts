@@ -22,6 +22,7 @@ export const ndaAgreementSlice = createSlice({
     // FIX: Must explicitly RETURN the payload when the state is a primitive type (string).
     updateNdaAgreement: (state, action: PayloadAction<ndaAgreementType>) => {
       // Correct way to update a primitive state: return the new value.
+      console.log(state, action.payload);
       return action.payload;
 
       // The incorrect line was: state = action.payload

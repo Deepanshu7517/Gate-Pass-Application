@@ -19,16 +19,16 @@ import { cn } from "../../../../lib/utils";
 
 // --- Mock Employee Data (Needed for the Combobox) ---
 export const employees = [
-  { name: "Jane Doe", post: "Project Manager" },
-  { name: "John Smith", post: "Software Engineer" },
-  { name: "Emily Johnson", post: "HR Executive" },
-  { name: "Michael Brown", post: "UX Designer" },
-  { name: "Sarah Wilson", post: "QA Analyst" },
-  { name: "David Lee", post: "DevOps Engineer" },
-  { name: "Olivia Davis", post: "Product Owner" },
-  { name: "James Miller", post: "Backend Developer" },
-  { name: "Sophia Taylor", post: "Frontend Developer" },
-  { name: "Daniel Anderson", post: "System Administrator" },
+  { name: "Jane Doe", post: "Project Manager", department: "Management" },
+  { name: "John Smith", post: "Software Engineer", department: "Engineering" },
+  { name: "Emily Johnson", post: "HR Executive", department: "Human Resources" },
+  { name: "Michael Brown", post: "UX Designer", department: "Design" },
+  { name: "Sarah Wilson", post: "QA Analyst", department: "Quality Assurance" },
+  { name: "David Lee", post: "DevOps Engineer", department: "IT & Operations" },
+  { name: "Olivia Davis", post: "Product Owner", department: "Product" },
+  { name: "James Miller", post: "Backend Developer", department: "Engineering" },
+  { name: "Sophia Taylor", post: "Frontend Developer", department: "Engineering" },
+  { name: "Daniel Anderson", post: "System Administrator", department: "IT & Operations" },
 ];
 
 // --- Types ---
@@ -38,6 +38,7 @@ type FormData = {
   host: {
     name: string;
     post: string;
+    department: string;
   };
   purposeOfVisit: string;
 };
@@ -85,6 +86,7 @@ export default function GatePassCompanyDetailsPage() {
     host: {
       name: checkinState.companyDetails.host?.name || "",
       post: checkinState.companyDetails.host?.post || "",
+      department: checkinState.companyDetails.host?.department || "",
     },
     purposeOfVisit: checkinState.companyDetails.purposeOfVisit || "",
   });
@@ -148,6 +150,7 @@ export default function GatePassCompanyDetailsPage() {
       host: {
         name: employee.name,
         post: employee.post,
+        department: employee.department
       },
     }));
     if (errors.host) {

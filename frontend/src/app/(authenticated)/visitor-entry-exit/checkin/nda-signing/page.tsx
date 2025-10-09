@@ -15,7 +15,7 @@ import { Input } from "../../../../../components/ui/input";
 import { ScrollArea } from "../../../../../components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
 import SignatureCanvas from "../../../../../components/ui/signatureCanvas";
-
+const visitorId = `VIS-${Date.now()}`.toUpperCase();
 type FormData = {
   name: string;
   company: string;
@@ -110,6 +110,7 @@ export default function NdaSigningPage() {
       !state.companyDetails.address.trim() ||
       !state.companyDetails.host.name.trim() ||
       !state.companyDetails.host.post.trim() ||
+      !state.companyDetails.host.department.trim() ||
       !state.companyDetails.purposeOfVisit.trim()
     ) {
       alert("Please complete the Company Details section first");
@@ -130,9 +131,7 @@ export default function NdaSigningPage() {
     }
 
     // Generate unique ID
-    const visitorId = `VIS-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 9)}`.toUpperCase();
+    
 
     dispatch(
       updateState({

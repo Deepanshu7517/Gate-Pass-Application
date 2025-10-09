@@ -41,7 +41,7 @@ export default function PrintBadgePage() {
         companyDetails: {
           companyName: "",
           address: "",
-          host: {name:"",post:""},
+          host: { name: "", post: "", department: "" },
           purposeOfVisit: "",
         },
         photograph: null,
